@@ -62,18 +62,26 @@ def classify_mood(transcript_words: list, clip_start: float, clip_end: float) ->
 def try_elevenlabs_music(prompt: str, duration_s: float, out_path: Path) -> bool:
     """Call ElevenLabs Music API. Returns True on success.
 
-    Reads API key from ELEVENLABS_API_KEY env or .env at video-use repo root.
+    Resolves the key (first hit wins) so Sam uses HIS OWN key and never spends
+    anyone else's credits:
+      1. ELEVENLABS_API_KEY env var
+      2. .env at the repo root (sam-yt-shorts-engine/.env — the obvious place)
+      3. .env at the video-use repo root (shared with transcription)
     """
-    api_key = os.environ.get("ELEVENLABS_API_KEY")
+    def _read_env(p):
+        if not p.exists():
+            return None
+        for line in p.read_text().splitlines():
+            if line.strip().startswith("ELEVENLABS_API_KEY="):
+                return line.split("=", 1)[1].strip().strip('"\'')
+        return None
+    repo_root = Path(__file__).resolve().parents[2]
+    api_key = (os.environ.get("ELEVENLABS_API_KEY")
+               or _read_env(repo_root / ".env")
+               or _read_env(Path.home() / ".claude/skills/video-use/.env"))
     if not api_key:
-        env_path = Path.home() / ".claude/skills/video-use/.env"
-        if env_path.exists():
-            for line in env_path.read_text().splitlines():
-                if line.startswith("ELEVENLABS_API_KEY="):
-                    api_key = line.split("=", 1)[1].strip().strip('"\'')
-                    break
-    if not api_key:
-        print("⚠ no ELEVENLABS_API_KEY — falling back to library", file=sys.stderr)
+        print("⚠ no ELEVENLABS_API_KEY — add yours to the repo .env "
+              "(copy .env.example); falling back to music library", file=sys.stderr)
         return False
 
     # Pad the duration slightly so end card doesn't sit on a sudden cut
