@@ -1,0 +1,19 @@
+# macOS metadata
+.DS_Store
+._*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Working/scratch directories from brand_library build scripts
+brand_library/_tmp_concepts/
+brand_library/_previews/
+brand_library/_previews_alpha/
+brand_library/concepts/_rejected/
+brand_library/concepts/CONTACT_SHEET*.png
+
+# Reference screenshots (private — Harry's own captures, not for distribution)
+brand_library/people/_*reference*
+brand_library/people/_*screenshot*

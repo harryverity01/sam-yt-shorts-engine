@@ -1,0 +1,37 @@
+{
+  "_comment": "Sam YT Shorts Engine — asset paths. Paths starting with '../' are RELATIVE to this brand_assets.json file (i.e. one level up = repo root). Override only if you've moved assets outside the repo.",
+  "_repo_relative": true,
+  "brand_library": "../brand_library",
+  "music_library": "../music",
+  "music_tracks": [
+    {"file": "Show the How 2.mp3", "moods": ["confident", "proof", "tutorial", "how-to"]},
+    {"file": "Show the How Suno.mp3", "moods": ["confident", "proof", "tutorial", "alternate"]},
+    {"file": "Varation 1 strings.mp3", "moods": ["emotive", "origin", "story", "cinematic"]},
+    {"file": "Varation 2 strings.mp3", "moods": ["emotive", "restrained", "thoughtful"]}
+  ],
+  "fonts": {
+    "caption_black": "../fonts/Montserrat-Black.ttf",
+    "caption_bold": "../fonts/Montserrat-Bold.ttf",
+    "caption_reg": "../fonts/Montserrat-Regular.ttf",
+    "brand_serif": "../fonts/Bellefair-Regular.ttf"
+  },
+  "video_use_helpers": "~/.claude/skills/video-use/helpers",
+  "render_specs": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 25,
+    "music_db": -16,
+    "caption_y_ratio": 0.62,
+    "caption_size_pt": 140,
+    "caption_stroke_px": 8,
+    "caption_window_s": 1.5,
+    "caption_fade_s": 0.15
+  },
+  "channel": {
+    "instagram": "@sameyeam.secrets",
+    "youtube_handle": "@sameyeam",
+    "youtube_channel_id": "UCMkyqr9NHL1yiTOHR45n9mA",
+    "course_url": "sameyeam.info/course",
+    "discovery_call": "go.sameyeam.info/call"
+  }
+}

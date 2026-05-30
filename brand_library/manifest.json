@@ -1,0 +1,447 @@
+{
+  "version": "1.0",
+  "generated": "2026-05-28",
+  "owner": "Harry Verity",
+  "purpose": "Reusable brand assets for editing Sam Eye Am content. Library is currently PAUSED \u2014 only 2 active concepts (both IG-UI recreations). Logos + people are still active assets.",
+  "channel": {
+    "handle": "@sameyeam",
+    "channel_id": "UCMkyqr9NHL1yiTOHR45n9mA",
+    "instagram": "@sameyeam.secrets",
+    "free_course": "sameyeam.info/course",
+    "discovery_call": "go.sameyeam.info/call"
+  },
+  "brand_palette": {
+    "orange_primary": "#FF8C3C",
+    "orange_dark": "#DC641E",
+    "navy": "#0C0E16",
+    "navy_light": "#181C2A",
+    "cream": "#F5F0E6",
+    "red_accent": "#D62828",
+    "white": "#FFFFFF",
+    "dim_grey": "#9696A0"
+  },
+  "fonts": {
+    "headline_sam_brand": "Bellefair Regular (high-contrast Didone serif, ORANGE offset shadow sx=6 sy=8, upright \u2014 no skew). Use for ALL Sam-branded overlay graphics.",
+    "subtitle": "Montserrat Black",
+    "body": "Montserrat Regular",
+    "ig_popup_ui": "Helvetica Bold / SF Pro (system) \u2014 ONLY for the IG popup recreation, NOT Bellefair (because we're mimicking Instagram's own UI).",
+    "legacy_anton": "Anton Regular \u2014 being phased out; ignore for new builds."
+  },
+  "render_specs": {
+    "resolution": "1080x1920 (9:16)",
+    "fps": 25,
+    "codec": "ProRes 4444 (yuva444p10le) with alpha",
+    "envelope": "pop-in 0.20s + hold + pop-out 0.20s, ease_out_cubic"
+  },
+  "folders": {
+    "logos/": "48 brand/company logos (PNGs from Brandfetch) \u2014 sized for overlay",
+    "people/": "11 portrait PNGs/JPGs (incl. Sam's actual IG avatar) \u2014 for talking-head reference cuts",
+    "concepts/": "2 active motion graphics (the 2 IG cards) \u2014 library paused 2026-05-28",
+    "concepts/_previews/": "Static stills of each concept (cream bg) for browsing",
+    "concepts/_previews_alpha/": "Alpha-preserved stills (transparent PNG)",
+    "concepts/CONTACT_SHEET_CREAM.png": "6-column visual index of all concepts on cream background",
+    "broll/": "Reserved for catalogued Sam b-roll clips (not yet populated)",
+    "numbers/": "Reserved for number-counter renders (not yet populated)",
+    "sam_content/": "Reserved for source clips from Sam's channel",
+    "concepts/_rejected/": "39 archived rejected concepts (not in manifest, preserved on disk)"
+  },
+  "stats": {
+    "logos": 48,
+    "people": 11,
+    "concepts_active": 5,
+    "concepts_archived_in_rejected_folder": 39
+  },
+  "logos": [
+    {
+      "file": "adobe_com_logo.png",
+      "brand": "Adobe",
+      "use_when": "Sam mentions Adobe / Creative Cloud"
+    },
+    {
+      "file": "airbnb_com_logo.png",
+      "brand": "Airbnb",
+      "use_when": "Sam mentions Airbnb, rental stays, travel housing"
+    },
+    {
+      "file": "americanexpress_com_logo.png",
+      "brand": "Amex",
+      "use_when": "Sam mentions Amex / credit cards"
+    },
+    {
+      "file": "anthropic_com_logo.png",
+      "brand": "Anthropic",
+      "use_when": "Sam mentions Claude/Anthropic"
+    },
+    {
+      "file": "apple_com_logo.png",
+      "brand": "Apple",
+      "use_when": "iPhone/Mac references"
+    },
+    {
+      "file": "blackmagicdesign_com_logo.png",
+      "brand": "Blackmagic Design",
+      "use_when": "DaVinci Resolve / camera kit references"
+    },
+    {
+      "file": "calendly_com_logo.png",
+      "brand": "Calendly",
+      "use_when": "Booking calls / scheduling automation"
+    },
+    {
+      "file": "capcut_com_logo.png",
+      "brand": "CapCut",
+      "use_when": "Editing workflow references"
+    },
+    {
+      "file": "chatgpt_com_logo.png",
+      "brand": "ChatGPT",
+      "use_when": "Sam mentions GPT / OpenAI tools"
+    },
+    {
+      "file": "claude_ai_logo.png",
+      "brand": "Claude",
+      "use_when": "Sam mentions Claude / Anthropic"
+    },
+    {
+      "file": "descript_com_logo.png",
+      "brand": "Descript",
+      "use_when": "Podcast editing / transcript-based editing"
+    },
+    {
+      "file": "elevenlabs_io_logo.png",
+      "brand": "ElevenLabs",
+      "use_when": "AI voice / voiceover automation"
+    },
+    {
+      "file": "facebook_com_logo.png",
+      "brand": "Facebook",
+      "use_when": "Social platform reference"
+    },
+    {
+      "file": "forbes_com_logo.png",
+      "brand": "Forbes",
+      "use_when": "Press / authority overlay"
+    },
+    {
+      "file": "fourseasons_com_logo.png",
+      "brand": "Four Seasons",
+      "use_when": "Luxury client references"
+    },
+    {
+      "file": "gohighlevel_com_logo.png",
+      "brand": "GoHighLevel",
+      "use_when": "CRM / agency-stack references"
+    },
+    {
+      "file": "goldmansachs_com_logo.png",
+      "brand": "Goldman Sachs",
+      "use_when": "Finance / Wall St analogy"
+    },
+    {
+      "file": "google_com_logo.png",
+      "brand": "Google",
+      "use_when": "Search / Google products"
+    },
+    {
+      "file": "hilton_com_logo.png",
+      "brand": "Hilton",
+      "use_when": "Hotel client work, Sam Hilton stay reference"
+    },
+    {
+      "file": "instagram_com_logo.png",
+      "brand": "Instagram",
+      "use_when": "Sam's main platform \u2014 always on stat overlays"
+    },
+    {
+      "file": "jpmorgan_com_logo.png",
+      "brand": "JPMorgan",
+      "use_when": "Finance / Wall St analogy"
+    },
+    {
+      "file": "kajabi_com_logo.png",
+      "brand": "Kajabi",
+      "use_when": "Course platform / coaching stack"
+    },
+    {
+      "file": "lightroom_adobe_com_logo.png",
+      "brand": "Adobe Lightroom",
+      "use_when": "Photo editing / preset references"
+    },
+    {
+      "file": "linkedin_com_logo.png",
+      "brand": "LinkedIn",
+      "use_when": "B2B / professional networking"
+    },
+    {
+      "file": "mailchimp_com_logo.png",
+      "brand": "Mailchimp",
+      "use_when": "Email automation / newsletter"
+    },
+    {
+      "file": "manychat_com_logo.png",
+      "brand": "ManyChat",
+      "use_when": "DM automation \u2014 Sam's core CTA mechanic"
+    },
+    {
+      "file": "mastercard_com_logo.png",
+      "brand": "Mastercard",
+      "use_when": "Payment processing"
+    },
+    {
+      "file": "openai_com_logo.png",
+      "brand": "OpenAI",
+      "use_when": "GPT / DALL-E / Sora references"
+    },
+    {
+      "file": "paypal_com_logo.png",
+      "brand": "PayPal",
+      "use_when": "Payment / Stripe alternative"
+    },
+    {
+      "file": "premiere_adobe_com_logo.png",
+      "brand": "Premiere Pro",
+      "use_when": "Video editing workflow"
+    },
+    {
+      "file": "runway_com_logo.png",
+      "brand": "Runway",
+      "use_when": "AI video / Gen-3 references"
+    },
+    {
+      "file": "shopify_com_logo.png",
+      "brand": "Shopify",
+      "use_when": "E-commerce / online store"
+    },
+    {
+      "file": "sohohouse_com_logo.png",
+      "brand": "Soho House",
+      "use_when": "Sam's London / Soho House anecdotes"
+    },
+    {
+      "file": "spacex_com_logo.png",
+      "brand": "SpaceX",
+      "use_when": "Elon / ambition / scaling analogies"
+    },
+    {
+      "file": "square_com_logo.png",
+      "brand": "Square",
+      "use_when": "Payment processing"
+    },
+    {
+      "file": "stripe_com_logo.png",
+      "brand": "Stripe",
+      "use_when": "Sam's $10k Stripe fees moment \u2014 CORE asset"
+    },
+    {
+      "file": "stripe_logo_dark.png",
+      "brand": "Stripe (dark)",
+      "use_when": "Dark backgrounds"
+    },
+    {
+      "file": "stripe_logo_light.png",
+      "brand": "Stripe (light)",
+      "use_when": "Light backgrounds"
+    },
+    {
+      "file": "stripe_other_dark.png",
+      "brand": "Stripe (alt)",
+      "use_when": "Alt composition"
+    },
+    {
+      "file": "teachable_com_logo.png",
+      "brand": "Teachable",
+      "use_when": "Course platform"
+    },
+    {
+      "file": "tesla_com_logo.png",
+      "brand": "Tesla",
+      "use_when": "Elon / Musk references"
+    },
+    {
+      "file": "theguardian_com_logo.png",
+      "brand": "Guardian",
+      "use_when": "Press credit overlay (Sam's columnist references)"
+    },
+    {
+      "file": "tiktok_com_logo.png",
+      "brand": "TikTok",
+      "use_when": "Cross-platform social references"
+    },
+    {
+      "file": "tommy_com_logo.png",
+      "brand": "Tommy Hilfiger",
+      "use_when": "Sam's brand client name-drops"
+    },
+    {
+      "file": "visa_com_logo.png",
+      "brand": "Visa",
+      "use_when": "Payment processing"
+    },
+    {
+      "file": "wikipedia_org_logo.png",
+      "brand": "Wikipedia",
+      "use_when": "Citation overlay"
+    },
+    {
+      "file": "x_com_logo.png",
+      "brand": "X (Twitter)",
+      "use_when": "Tweet quote overlays"
+    },
+    {
+      "file": "youtube_com_logo.png",
+      "brand": "YouTube",
+      "use_when": "Platform reference"
+    }
+  ],
+  "people": [
+    {
+      "file": "alan_watts.png",
+      "name": "Alan Watts",
+      "use_when": "Sam quotes Alan Watts on purpose/identity"
+    },
+    {
+      "file": "sam_eye_am.png",
+      "name": "Sam Eye Am (HIMSELF)",
+      "use_when": "Reference avatar for Sam \u2014 used in the IG popup recreation; also for any 'Sam himself' callouts"
+    },
+    {
+      "file": "danielle_lukins.png",
+      "name": "Danielle Lukins",
+      "use_when": "Sam's Apr 2026 crypto podcast guest (440K followers)"
+    },
+    {
+      "file": "elon_musk.jpg",
+      "name": "Elon Musk",
+      "use_when": "Sam references Elon / SpaceX / ambition"
+    },
+    {
+      "file": "joe_rogan.jpg",
+      "name": "Joe Rogan",
+      "use_when": "Sam podcast-format / long-form interview references"
+    },
+    {
+      "file": "naval_ravikant.jpg",
+      "name": "Naval Ravikant",
+      "use_when": "Sam quotes Naval on wealth/leverage"
+    },
+    {
+      "file": "piers_morgan.jpg",
+      "name": "Piers Morgan",
+      "use_when": "Sam UK media references"
+    },
+    {
+      "file": "robert_greene.jpg",
+      "name": "Robert Greene",
+      "use_when": "Sam cites Mastery / 48 Laws \u2014 recurring book reference"
+    },
+    {
+      "file": "rockefeller.jpg",
+      "name": "J.D. Rockefeller",
+      "use_when": "Sam's 'nation of workers not thinkers' quote"
+    },
+    {
+      "file": "tony_robbins.jpg",
+      "name": "Tony Robbins",
+      "use_when": "Sam coaching/mindset analogies"
+    },
+    {
+      "file": "warren_buffett.jpg",
+      "name": "Warren Buffett",
+      "use_when": "Sam's 'principle of sharing' quote attribution"
+    }
+  ],
+  "concepts": [
+    {
+      "file": "handle_sameyeam_secrets.mov",
+      "duration": 3.0,
+      "category": "lower_third_handle",
+      "trigger": "Reusable Sam IG handle lower-third \u2014 drop at start or end of any Short"
+    },
+    {
+      "file": "sam_ig_popup.mov",
+      "duration": 4.0,
+      "category": "ig_popup",
+      "trigger": "Pixel-faithful recreation of @sameyeam.secrets profile header (avatar / verified / 143K followers / Follow button). Use as social-proof CTA mid-Short or at end card. Slide-down + hold + fade. Built from Helvetica/SF Pro (IG's own UI fonts), NOT Bellefair.",
+      "build_script": "build_ig_popup.py"
+    },
+    {
+      "file": "sam_calendly_fully_booked.mov",
+      "duration": 6.0,
+      "category": "calendly_booking",
+      "trigger": "Pixel-faithful recreation of Sam's actual calendly.com/sameyeam/call page. 6s animation: card slides in, dates progressively light up blue (demand surge), then turn grey/struck-through as bookings complete, ending with FULLY BOOKED red stamp slam. Use for: 150 calls from 1 post / fully booked stories / demand-proof moments.",
+      "build_script": "build_sam_calendly.py",
+      "source_reference": "people/_sam_calendly_reference.png"
+    },
+    {
+      "file": "broll/william_brown_villa.mp4",
+      "duration": 3.96,
+      "category": "broll_reference",
+      "trigger": "William Brown mentioned in low-stat / relaxed-energy contexts (high-stat contexts go to sam_ig_popup instead \u2014 see pick_broll picker logic)",
+      "source_reference": "/Volumes/Seagate/YouTube/Sam Ey Am/Joe Rogan Style/sam_yt_collabs/clips/01_sam_william_wide.mp4",
+      "crop_notes": "608x1080 crop biased to right (William on right side of wide); scaled to 1080x1920 with Sam grade applied"
+    },
+    {
+      "file": "concepts/ig_comment_<keyword>.mov",
+      "duration": 5.0,
+      "category": "ig_comment_highlight",
+      "trigger": "When Sam asks viewers to comment a specific word in the clip (\"comment TRAINING\", \"comment CLIENTS\", etc). Parameterised \u2014 keyword is rendered at runtime via build_ig_comments.py --keyword <X>",
+      "build_script": "build_ig_comments.py",
+      "source_reference": "people/_sam_ig_comments_reference.png",
+      "params": [
+        "keyword",
+        "username",
+        "comment_text",
+        "avatar_color"
+      ],
+      "runtime_render": true
+    }
+  ],
+  "categories_legend": {
+    "stat_reveal": "Big number lands with counter/burst \u2014 use on punch lines",
+    "principle": "Quote-card style \u2014 Sam's maxims",
+    "quote": "Attributed quote (Buffett, Rockefeller, etc.)",
+    "origin": "Backstory moments (Nike, DJ, festival)",
+    "origin_arc": "Multi-stage origin transition (DJ\u2192photographer)",
+    "comparison": "A vs B side-by-side",
+    "binary_choice": "'You have two options' framing",
+    "system_diagram": "Workflow/automation visual",
+    "system_proof": "Stat + visual proof of system",
+    "money_anecdote": "Stripe fees / revenue stories",
+    "location_pin": "Map/pin animation for geo references",
+    "location": "Static location card",
+    "client_namedrop": "Multi-brand stack (Hilton/Tommy/Hugo)",
+    "brand_badge": "Single brand call-out (Yacht Week)",
+    "book_credit": "Recommended book card",
+    "person_credit": "Recommended person card",
+    "person_silhouette": "Generic-person reference",
+    "press_credit": "Publication overlay",
+    "lower_third": "Bottom-of-frame sponsor strip",
+    "lower_third_handle": "Bottom-of-frame IG handle CTA",
+    "cta_dm": "End-of-Short DM trigger card",
+    "mindset": "Hustle/grind framing",
+    "metaphor": "Visual metaphor (prison bars, staircase)",
+    "tool": "Single tool/object call-out",
+    "routine": "Daily-habit visual",
+    "timeline": "Age/year progression chart",
+    "stat_visual": "Pie/bar diagram for a stat"
+  },
+  "how_to_use": {
+    "summary": "Drop the .mov files straight into CapCut/Premiere/Resolve as overlay tracks. They have transparent backgrounds (ProRes 4444 with alpha). Each clip self-animates pop-in \u2192 hold \u2192 pop-out.",
+    "trigger_workflow": "1. Cut your Sam interview down. 2. Scan the transcript for keyword triggers in this manifest. 3. Drop matching concept clip on the overlay track at the trigger timestamp. 4. Pair with relevant logo PNG if a brand is named.",
+    "stacking_rules": "Don't overlap concepts. Cadence: every 8\u201315s of B-roll/graphic \u2014 matches Sam's viral cut cadence."
+  },
+  "library_status": {
+    "state": "GROWING \u2014 3 active concepts (2 IG + 1 Calendly)",
+    "note": "Built 41 speculative concept graphics, only 2 survived review (the IG-UI mimicry ones). Lesson: pixel-faithful reference beats abstract concepts. Remaining 39 .mov files archived in concepts/_rejected/ \u2014 preserved in case any are useful when a real Sam edit needs an overlay, but not in the active manifest.",
+    "active_concepts": [
+      "sam_ig_popup.mov",
+      "handle_sameyeam_secrets.mov",
+      "sam_calendly_fully_booked.mov",
+      "broll/william_brown_villa.mp4",
+      "concepts/ig_comment_<keyword>.mov (runtime)"
+    ],
+    "archived_count": 39,
+    "archive_location": "concepts/_rejected/",
+    "next_step": "When a Sam edit actually needs a new graphic, build it from a specific reference (his actual short, IG screenshot, etc.) \u2014 not from a speculative concept list."
+  }
+}
