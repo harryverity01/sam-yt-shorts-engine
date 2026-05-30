@@ -53,6 +53,29 @@ _CFG = _resolve_relative_paths(json.load(open(BRAND_ASSETS)), BRAND_ASSETS.resol
 VIDEO_USE_HELPERS = Path(_CFG.get("video_use_helpers", Path.home() / ".claude/skills/video-use/helpers"))
 
 
+def _load_env_into_os():
+    """Load the repo-root .env so Sam's ElevenLabs key reaches EVERY downstream
+    step (transcription via video-use AND music) from one place. Only sets keys
+    that aren't already in the environment — an explicit env var always wins.
+
+    Repo root = .../sam-yt-shorts-engine  (this file is in sam-clips-engine/).
+    """
+    repo_env = SKILL_DIR.parent / ".env"
+    if not repo_env.exists():
+        return
+    for line in repo_env.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, v = line.split("=", 1)
+        k, v = k.strip(), v.strip().strip('"\'')
+        if v and v != "your_elevenlabs_key_here" and k not in os.environ:
+            os.environ[k] = v
+
+
+_load_env_into_os()
+
+
 def run(cmd, check=True, capture=False):
     """Run a command. If check, exit on failure. If capture, return stdout."""
     print(f"  $ {' '.join(str(c) for c in cmd)}")

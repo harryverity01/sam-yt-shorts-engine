@@ -36,14 +36,27 @@ echo -n "  video-use skill ... "
     exit 1
 }
 
-# 4. API keys
+# 4. API keys — must be SAM'S OWN key (bills his ElevenLabs account, not anyone else's)
+REPO_ROOT="$(cd "$SKILL_DIR/.." && pwd)"   # sam-yt-shorts-engine/
 echo -n "  ELEVENLABS_API_KEY ... "
+key_ok=0
 if [ -n "$ELEVENLABS_API_KEY" ]; then
-    echo "ok (env)"
+    echo "ok (env var)"; key_ok=1
+elif [ -f "$REPO_ROOT/.env" ] && grep -q "^ELEVENLABS_API_KEY=..*" "$REPO_ROOT/.env" && ! grep -q "your_elevenlabs_key_here" "$REPO_ROOT/.env"; then
+    echo "ok (repo .env)"; key_ok=1
 elif [ -f "$HOME/.claude/skills/video-use/.env" ] && grep -q ELEVENLABS_API_KEY "$HOME/.claude/skills/video-use/.env"; then
-    echo "ok (.env)"
+    echo "ok (video-use .env)"; key_ok=1
 else
-    echo "MISSING — set ELEVENLABS_API_KEY env var or add to ~/.claude/skills/video-use/.env"
+    echo "NOT SET"
+fi
+if [ "$key_ok" = "0" ]; then
+    echo ""
+    echo "  ┌─ ADD YOUR OWN ELEVENLABS KEY ─────────────────────────────┐"
+    echo "  │  cp \"$REPO_ROOT/.env.example\" \"$REPO_ROOT/.env\""
+    echo "  │  then edit .env and paste your key from elevenlabs.com.     │"
+    echo "  │  (It's gitignored — never committed. Bills YOUR account.)   │"
+    echo "  │  Without it, music falls back to the included library.      │"
+    echo "  └────────────────────────────────────────────────────────────┘"
 fi
 
 echo "  ANTHROPIC_API_KEY ... not needed (skill runs inside Claude Code session, not via SDK)"

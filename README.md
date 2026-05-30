@@ -23,7 +23,7 @@ sam-yt-shorts-engine/
 - **Python 3.11+** with PIL/Pillow
 - **Claude Code** installed with active subscription
 - **video-use** skill installed at `~/.claude/skills/video-use/` (the cutting foundation — install separately from its own repo)
-- **ELEVENLABS_API_KEY** in env or at `~/.claude/skills/video-use/.env` (for Scribe transcription + per-clip music generation)
+- **Your own ElevenLabs API key** (see step 2.5 below) — used for Scribe transcription + per-clip music. It bills *your* ElevenLabs account, so it must be your key.
 
 ### 2. Install
 
@@ -37,6 +37,17 @@ The installer:
 - Symlinks `sam-clips-engine/` to `~/.claude/skills/sam-clips-engine/` so Claude Code discovers it
 - Verifies ffmpeg, yt-dlp, video-use, ElevenLabs key
 - Checks all asset paths resolve
+
+### 2.5. Add YOUR ElevenLabs key (important — it's your bill)
+
+```bash
+cp .env.example .env
+# then open .env and paste your key from https://elevenlabs.io (Profile → API Keys)
+```
+
+This `.env` is **gitignored** — it's never committed or shared. The engine reads the key from here (or from an `ELEVENLABS_API_KEY` env var if you prefer). Everything bills **your** ElevenLabs account.
+
+Without a key, the engine still runs — it just falls back to the included music library instead of generating bespoke per-clip music.
 
 ### 3. Use
 
