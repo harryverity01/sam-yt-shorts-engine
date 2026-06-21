@@ -20,10 +20,13 @@ import argparse, json, re, sys
 from pathlib import Path
 from collections import defaultdict
 
+DEFAULT_BRAND_ASSETS = Path(__file__).parent.parent / "brand_assets.json"
 
-def _resolve_relative_paths(cfg: dict, brand_assets_path: Path) -> dict:
-    """Resolve any '../path' values in cfg as relative to brand_assets.json's parent."""
-    base = brand_assets_path.parent
+
+def _resolve_relative_paths(cfg, brand_assets_path):
+    """Resolve '../x' (relative to brand_assets.json) and '~/x' path values so the
+    same code runs on any machine. Absolute paths pass through untouched."""
+    base = Path(brand_assets_path).resolve().parent
     def walk(o):
         if isinstance(o, dict):
             return {k: walk(v) for k, v in o.items()}
@@ -35,8 +38,6 @@ def _resolve_relative_paths(cfg: dict, brand_assets_path: Path) -> dict:
             return str(Path(o).expanduser())
         return o
     return walk(cfg)
-
-DEFAULT_BRAND_ASSETS = Path(__file__).parent.parent / "brand_assets.json"
 
 
 # Trigger phrase → asset rules. Order matters — earlier rules win.
@@ -265,7 +266,7 @@ def main():
     ap.add_argument("--brand-assets", type=Path, default=DEFAULT_BRAND_ASSETS)
     args = ap.parse_args()
 
-    cfg = _resolve_relative_paths(_resolve_relative_paths(json.load(open(args.brand_assets)), Path(args.brand_assets).resolve()), Path(args.brand_assets).resolve() if not str(args.brand_assets).startswith("Path") else args.brand_assets)
+    cfg = _resolve_relative_paths(json.load(open(args.brand_assets)), args.brand_assets)
     brand_lib = Path(cfg["brand_library"])
 
     data = json.load(open(args.transcript_json))

@@ -1,6 +1,6 @@
 # Sam YT Shorts Engine
 
-End-to-end clips engine for **Sam Eye Am** (@sameyeam.secrets). Drop in a long-form interview or podcast, get back finished 30-45s vertical Shorts ready to upload — viral moment selection, precision cuts, branded captions, b-roll overlays, and ElevenLabs music.
+End-to-end clips engine for **Sam Eye Am** (@sameyeam.secrets). Drop in a long-form interview or podcast, get back finished 30-45s vertical Shorts ready to upload — viral moment selection, silence-stripped precision cuts (re-checked with Scribe so no word gets clipped), branded captions, b-roll overlays, and Suno/ElevenLabs music.
 
 Runs inside Claude Code as a skill.
 
@@ -126,8 +126,8 @@ Sam-specific:
 
 ## Cost
 
-- **ElevenLabs Scribe transcription** — ~$0.40 per hour of source audio (cached, runs once)
-- **ElevenLabs Music generation** — included in your ElevenLabs subscription (per-clip bespoke). Falls back to library if quota tight.
+- **ElevenLabs Scribe transcription** — ~$0.40 per hour of source audio (cached). Each clip is also re-transcribed once for the end-of-word safety check (a few seconds of audio — negligible).
+- **Music** — Suno (if `SUNO_API_KEY` set) or ElevenLabs music gen, per-clip bespoke. Falls back to the bundled library tracks if no key / quota tight (free).
 - **Claude (for ranking)** — runs inside your Claude Code subscription, no additional API cost
 
 ## Related repos

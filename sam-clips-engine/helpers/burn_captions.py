@@ -21,10 +21,14 @@ import argparse, json, subprocess, sys, tempfile, shutil
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
+DEFAULT_BRAND_ASSETS = Path(__file__).parent.parent / "brand_assets.json"
+W, H = 1080, 1920
 
-def _resolve_relative_paths(cfg: dict, brand_assets_path: Path) -> dict:
-    """Resolve any '../path' values in cfg as relative to brand_assets.json's parent."""
-    base = brand_assets_path.parent
+
+def _resolve_relative_paths(cfg, brand_assets_path):
+    """Resolve '../x' (relative to brand_assets.json) and '~/x' path values so the
+    same code runs on any machine. Absolute paths pass through untouched."""
+    base = Path(brand_assets_path).resolve().parent
     def walk(o):
         if isinstance(o, dict):
             return {k: walk(v) for k, v in o.items()}
@@ -36,9 +40,6 @@ def _resolve_relative_paths(cfg: dict, brand_assets_path: Path) -> dict:
             return str(Path(o).expanduser())
         return o
     return walk(cfg)
-
-DEFAULT_BRAND_ASSETS = Path(__file__).parent.parent / "brand_assets.json"
-W, H = 1080, 1920
 
 
 def render_word_png(word: str, font_path: str, size: int, stroke_px: int,
@@ -131,7 +132,7 @@ def main():
     args = ap.parse_args()
 
     captions = json.load(open(args.captions_json))
-    cfg = _resolve_relative_paths(_resolve_relative_paths(json.load(open(args.brand_assets)), Path(args.brand_assets).resolve()), Path(args.brand_assets).resolve() if not str(args.brand_assets).startswith("Path") else args.brand_assets)
+    cfg = _resolve_relative_paths(json.load(open(args.brand_assets)), args.brand_assets)
     out = args.out or args.body.with_name(f"{args.body.stem}_captioned.mp4")
     burn(args.body, captions, out, cfg)
 

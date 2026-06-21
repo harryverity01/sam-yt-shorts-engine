@@ -1,6 +1,6 @@
 ---
 name: sam-clips-engine
-description: End-to-end clips engine for Sam Eye Am (@sameyeam.secrets). Takes a long-form Sam interview/podcast (file or YouTube URL) and ships finished 30-45s vertical clips ready to upload — viral moment selection, precision cuts via Scribe word-level transcripts, Sam-brand b-roll from the brand library, Hormozi-style word-by-word captions, and ElevenLabs music (per-clip bespoke, library fallback). Use this skill whenever the user mentions Sam Eye Am, Sam Ey Am, @sameyeam, @sameyeam.secrets, clipping a Sam interview/podcast/long-form, or processing a Sam video to Shorts/Reels. Triggers on phrases like "clip this sam interview", "sam shorts from this video", "build sam clips", "process sam's podcast", "cut this for sam", "sam ey am pipeline", and any variant mentioning Sam + shorts/clips/reels/cuts. Even if the user just hands a video file or URL and mentions Sam, use this skill — it knows the full pipeline.
+description: End-to-end clips engine for Sam Eye Am (@sameyeam.secrets). Takes a long-form Sam interview/podcast (file or YouTube URL) and ships finished 30-45s vertical clips ready to upload — viral moment selection, precision cuts via Scribe word-level transcripts, Sam-brand b-roll from the brand library, Hormozi-style word-by-word captions, and Suno/ElevenLabs music (per-clip bespoke, library fallback). Use this skill whenever the user mentions Sam Eye Am, Sam Ey Am, @sameyeam, @sameyeam.secrets, clipping a Sam interview/podcast/long-form, or processing a Sam video to Shorts/Reels. Triggers on phrases like "clip this sam interview", "sam shorts from this video", "build sam clips", "process sam's podcast", "cut this for sam", "sam ey am pipeline", and any variant mentioning Sam + shorts/clips/reels/cuts. Even if the user just hands a video file or URL and mentions Sam, use this skill — it knows the full pipeline.
 ---
 
 # Sam Clips Engine
@@ -15,9 +15,8 @@ What this skill adds on top:
 1. **Viral moment ranker** tuned for Sam's audience (coaches, consultants, AI-curious operators)
 2. **B-roll picker** that scans the clip transcript and pulls assets from Sam's brand library
 3. **Hormozi-style captions** matching the exact style of the 14 viral shorts already published
-4. **Music** — ElevenLabs first per-clip bespoke, falls back to Sam's 4-track music library
-
-The music-mixed clip is the final deliverable — **no end card** (Sam doesn't want one).
+4. **Music** — Suno first (modern beds), then ElevenLabs, then Sam's 4-track library
+5. **Silence-strip + re-listen cut** — tightens out dead air and verifies no word is clipped
 
 Sam will use this directly. Keep all paths Sam-relative — never reference Harry / HV / Gcore / Lownie / Evacuees.
 
@@ -29,7 +28,7 @@ Sam will use this directly. Keep all paths Sam-relative — never reference Harr
 - **yt-dlp** if ingesting from YouTube URL
 - Sam's assets present at:
   - `/Volumes/Seagate/YouTube/Sam Ey Am/brand_library/` — manifest.json, concepts/, logos/, people/, build scripts
-  - `music/` — 4 fallback music tracks
+  - `/Volumes/Seagate/Sam Ey AM Music/` — 4 fallback music tracks
 
 Paths are read from `brand_assets.json` so Sam can override on his own machine.
 
@@ -73,23 +72,53 @@ This means the skill is portable across any Claude Code subscription with no API
 
 Sam's audience is knowledge workers escaping drudge work — small business owners scaling with AI, consultants raising prices, content creators monetising audiences. NOT founders, NOT devs, NOT AI Twitter.
 
-Output: `ranked_clips.json` — list of `{id, start, end, score, beat, hook_preview, reason}` where `id` references back into `candidates.json`.
+Output: `ranked_clips.json` — list of `{id, start, end, score, beat, hook_preview, reason}` where `id` references back into `candidates.json`. Each clip may also carry an optional **`cuts`** field — `[[start, end], ...]` source-time ranges to excise from inside the clip (filler/repeat sentences). Re-point `start` to the strongest line so the clip **opens on the hook**.
+
+Apply the **Script quality bar** in `references/sam_audience.md` — starts on the most
+interesting moment, every sentence interesting, no filler, no repetition, builds to a
+payoff. That's exactly how Sam judges a cut.
 
 Default: pick top 12 candidates. User can ask for more/fewer.
 
-**See `references/sam_audience.md` for the full audience profile plus the patterns the 14 already-shipped viral clips had in common.**
+**See `references/sam_audience.md` for the audience profile + script quality bar, `references/sam_voice.md` for Sam's spoken voice, and `references/sam_viral_patterns.md` for the 14 already-shipped viral clip patterns to match.**
 
-### Step 3 — Precision cut (use video-use directly)
+### Step 3 — Precision cut (silence-stripped + word-snapped + re-listened)
 
-For each picked moment:
-- Snap start/end to word boundaries from the Scribe transcript (Hard Rule 6)
-- Pad: 50ms before first kept word, 80ms after last (video-use default, matches the 14 shipped Sam shorts)
-- Build single-range EDL JSON per clip with the **Sam color grade** baked in (see below)
-- `render.py --preview` initially; full render after self-eval passes
+This is the step Sam gave feedback on: clips were **cutting mid-word / not fully
+understandable / elevator-paced**. The root cause was that the old orchestrator built
+a *single* EDL range per clip — it never actually stripped the silences the way Sam
+does by hand. It does now.
 
-Sam's shorts are tight: strip pauses ≥ 400ms within the clip via additional internal cuts in the EDL ranges. video-use's editor sub-agent brief in SKILL.md covers this — invoke it via the editor pattern. Do NOT bypass video-use's cutting helpers.
+How Sam cuts by hand (and what the code now replicates):
+> "I look at the audio, I cut every word out that I see — every time it's silent I
+> cut it out. Then I listen again to make sure all the words are recognisable."
 
-**Sam color grade** (locked from the 14 shipped shorts — same look across every clip):
+`helpers/tighten_cut.py` does the first half:
+- Selects the words inside the window from the **word-level Scribe transcript** and
+  snaps the clip to whole-word boundaries (never mid-word) — start on the first word,
+  end on the last word.
+- Removes every internal silence longer than `--max-gap` (default **0.28s**) by
+  splitting the clip into a **multi-range EDL** (one range per run of words). `render.py`
+  extracts each range with the Sam grade + 30ms fades and **losslessly concatenates**
+  them — so the result is tight but pop-free. Natural sub-0.28s gaps are kept so it
+  still breathes (not robotic).
+- Holds a larger tail pad on the **final word** (default 0.18s) so the payoff is
+  never clipped — Sam's #1 complaint.
+- Honors an optional `cuts` field on the ranked clip to excise whole filler/repeat
+  sentences from inside the clip (see `references/sam_audience.md`).
+
+`helpers/verify_cut.py` does the re-listen half (Sam's "extra protection"):
+- Re-transcribes the rendered cut with Scribe and checks the first/last words are
+  present and the final word isn't flush against the clip end (= clipped).
+- If the end looks clipped, the orchestrator re-cuts **once** with a longer end tail,
+  capped at +0.3s so it can never bleed the next sentence in (Sam's worry: "does it
+  make it a mess?"). Still flagged after the retry → left for manual review, not shipped silently.
+- Skippable with `--no-verify` (faster, costs no extra Scribe). On by default.
+
+Because silence removal **compresses the timeline**, the orchestrator remaps every
+caption and b-roll timing through `tighten_cut.map_src_to_out()` so they stay in sync.
+
+**Sam color grade** (locked from the 14 shipped shorts — one grade baked per-segment by `render.py`):
 ```
 curves=red='0/0 0.5/0.53 1/1':blue='0/0 0.5/0.45 1/1',eq=saturation=0.95:contrast=1.03:brightness=0.01
 ```
@@ -121,13 +150,21 @@ If a trigger fires but no matching asset exists in the brand library, **DO NOT I
 Sam's caption style is locked from the 14 viral shorts. Source-of-truth: `helpers/burn_captions.py` (replicates `build_short.py` exactly).
 
 ```
-Font:        Montserrat-Black at 140pt
+Font:        caption_black from brand_assets.json at 140pt
 Position:    centred horizontally, y = 0.62 * H
 Style:       White fill (#FFFFFF) + 8px black stroke (Hormozi-style)
 Trigger:     One word per caption, on key beats (NOT every word)
 Window:      1.5s per word with 0.15s pop-in + 0.15s pop-out via alpha fade
 Rendering:   PIL → PNG overlay → ffmpeg overlay filter (drawtext is unreliable on macOS Homebrew ffmpeg)
 ```
+
+> **Font swap (Sam's feedback):** Sam said the captions "are not my fonts / not my
+> style" and sent a new set. `burn_captions.py` reads the font from
+> `brand_assets.json` → `fonts.caption_black` — so the swap is a one-line config
+> change once the new font files are dropped in `_assets/fonts/`. Montserrat-Black is
+> the OLD default he rejected. Point `caption_black` at the heaviest weight of the new
+> family. (The geometry — 140pt, 8px stroke, y=0.62 — stays; only the typeface changes
+> unless Sam wants the size/weight retuned for the new font's metrics.)
 
 The caption picker reads the clip transcript and chooses which words to emphasise. Default heuristic:
 - Numbers (`$30K`, `150`, `4K`, `500K`)
@@ -138,22 +175,26 @@ The caption picker reads the clip transcript and chooses which words to emphasis
 
 Aim for **8–14 emphasised words per 30-45s clip** — sparse enough to land, dense enough to drive engagement.
 
-### Step 6 — Music
+### Step 6 — Music (final step)
 
-**Music** (`helpers/pick_music.py`):
-1. Default: ElevenLabs music generation, one bespoke track per clip
-   - Classify clip mood from transcript (proof / origin / contrarian / how-to / case-study)
-   - Generate via ElevenLabs HTTP API at `api.elevenlabs.io/v1/music`
-   - Universal prompt rules: `no vocals, no prominent drums, sits under YouTube VO, lofi production polish`
-   - Mood -> prompt seed mapping in `references/music_prompts.md`
-2. Fallback: if quota tight or ElevenLabs fails, pull from the `music/` library:
-   - `Show the How 2.mp3` - confident / proof / tutorial
-   - `Show the How Suno.mp3` - same vibe, alternate
-   - `Varation 1 strings.mp3` - emotive / origin / story
-   - `Varation 2 strings.mp3` - emotive / restrained
-3. Mix at **-16dB** under Sam's voice (matches build_short.py default)
+> **No end card.** Sam asked for the Subscribe end card to be removed — clips end on
+> the payoff. The final clip is just the music-mixed cut; nothing is appended.
 
-The music-mixed clip IS the final output - it's copied straight to `finished/`. **No end card** (Sam doesn't want one).
+**Music** (`helpers/pick_music.py`) — Sam said the old beds sounded like **elevator
+music**. Two fixes: (a) prompts are now modern/motivational with a subtle beat (not
+corporate-ambient), and (b) **Suno** is the preferred generator. Provider order:
+1. **Suno** (default when `SUNO_API_KEY` is set) — produced, modern beds.
+   - Classify clip mood (proof / origin / contrarian / how-to / case-study)
+   - Generate via the configured Suno provider (sunoapi.org v1 shape by default),
+     poll, download, trim to length. See `references/music_prompts.md` for setup.
+2. **ElevenLabs** — bespoke per-clip if Suno isn't configured or fails (`api.elevenlabs.io/v1/music`).
+3. Fallback: if both gen paths fail, pull from `/Volumes/Seagate/Sam Ey AM Music/`:
+   - `Show the How 2.mp3` — confident / proof / tutorial
+   - `Show the How Suno.mp3` — same vibe, alternate
+   - `Varation 1 strings.mp3` — emotive / origin / story
+   - `Varation 2 strings.mp3` — emotive / restrained
+4. Mix at **-16dB** under Sam's voice (matches build_short.py default), faded over the
+   tightened clip length.
 
 ## End-to-end orchestration
 
@@ -193,8 +234,11 @@ These come from video-use SKILL.md. Read its full Hard Rules section, but the hi
 Sam-specific additions:
 9. **Reference-first for new b-roll templates** — never invent a UI element; capture the real thing first (see `references/brand_library.md`)
 10. **One overlay per 8-15s** in the body — matches the 14 viral shorts' established cadence
-11. **No end card** — Sam doesn't want one; the music-mixed clip is the final output
+11. **No end card** — Sam removed it. Clips end on the payoff; nothing is appended.
 12. **Music at -16dB under voice** — never louder, never absent
+13. **Silence-strip every clip** — multi-range EDL via `tighten_cut.py`. Never ship a single-range cut full of dead air (that was the old bug). Snap to whole words; never cut mid-word.
+14. **Re-listen with Scribe** — `verify_cut.py` confirms the last word isn't clipped. Conservative single retry (+0.3s tail max) so it never bleeds the next sentence in. Don't disable verify on the final pass.
+15. **Remap timings after silence removal** — captions/overlays are computed in source time, then remapped to the compressed output timeline. Never burn source-time captions onto a tightened clip.
 
 ## Adding new brand templates
 
@@ -215,17 +259,22 @@ To add a new template (e.g., Stripe payment notification):
 ```
 sam-clips-engine/
 ├── SKILL.md                       ← this file
-├── brand_assets.json              ← paths to brand_library, music
+├── brand_assets.json              ← paths to brand_library, music, fonts + cut/music config
 ├── orchestrator.py                ← entry point — runs the 6 steps
 ├── helpers/
-│   ├── pick_moments.py            ← Step 2: viral moment ranker
+│   ├── pick_moments.py            ← Step 2: viral moment candidate generator
+│   ├── tighten_cut.py             ← Step 3: silence-strip + word-snap → multi-range EDL + time remap
+│   ├── verify_cut.py              ← Step 3: re-transcribe end-protection (Sam's re-listen)
 │   ├── pick_broll.py              ← Step 4: brand-library b-roll picker
+│   ├── pick_caption_words.py      ← Step 5: choose which words to emphasise
 │   ├── burn_captions.py           ← Step 5: Sam Hormozi caption overlays
-│   └── pick_music.py              ← Step 6: ElevenLabs + library fallback
+│   └── pick_music.py              ← Step 6: Suno → ElevenLabs → library (final step, no end card)
 ├── references/
-│   ├── sam_audience.md            ← Who Sam's audience is + viral hook patterns + what the 14 shipped shorts had in common
+│   ├── sam_audience.md            ← Audience + hook patterns + script quality bar + cuts field
+│   ├── sam_voice.md               ← Sam's spoken-voice style (populate from voice memos)
+│   ├── sam_viral_patterns.md      ← The 14 shipped shorts — what worked
 │   ├── brand_library.md           ← Asset catalogue + picker logic + how to add new
-│   └── music_prompts.md           ← ElevenLabs mood → prompt seed mapping
+│   └── music_prompts.md           ← Suno/ElevenLabs mood → prompt seed mapping
 └── scripts/
     └── install.sh                 ← One-shot install (deps + paths check)
 ```
@@ -257,5 +306,6 @@ Append the standard video-use session entry plus a Sam-specific block:
 - **Using Anton or Hormozi-orange in captions** — Sam's brand captions are white + black stroke (matches Hormozi-style but on Sam's content). Anton was the OLD experiment that got rejected.
 - **Multi-word captions** — Sam's emphasis style is single-word pop. Multi-word captions break the rhythm.
 - **Music louder than -16dB** — already tested; voice loses presence above that
-- **Adding an end card** — Sam doesn't want one. The music-mixed clip is the final output.
-- **Re-transcribing every run** — Scribe transcripts cache. Reuse them. Don't burn ElevenLabs quota.
+- **Adding an end card** — Sam removed it. Don't re-add a Subscribe/outro card.
+- **Cutting on silence-strip too hard** — `--max-gap` too low makes Sam sound robotic. 0.28s keeps natural breath; only go lower if he asks for tighter.
+- **Re-transcribing the SOURCE every run** — the source Scribe transcript caches; reuse it. (The short per-clip re-listen in verify_cut is separate and cheap — that's fine to run.)

@@ -9,11 +9,27 @@
     {"file": "Varation 1 strings.mp3", "moods": ["emotive", "origin", "story", "cinematic"]},
     {"file": "Varation 2 strings.mp3", "moods": ["emotive", "restrained", "thoughtful"]}
   ],
+  "_fonts_comment": "Caption font used by burn_captions.py at 140pt. Montserrat is the OLD default Sam rejected — drop the new font files in ../fonts/ and point caption_black at the heaviest weight to swap.",
   "fonts": {
     "caption_black": "../fonts/Montserrat-Black.ttf",
     "caption_bold": "../fonts/Montserrat-Bold.ttf",
     "caption_reg": "../fonts/Montserrat-Regular.ttf",
     "brand_serif": "../fonts/Bellefair-Regular.ttf"
+  },
+  "cut": {
+    "_comment": "Silence-strip + end-protection knobs (orchestrator CLI overrides win).",
+    "max_gap_s": 0.28,
+    "lead_pad_s": 0.05,
+    "tail_pad_s": 0.08,
+    "final_tail_pad_s": 0.18,
+    "verify_with_scribe": true
+  },
+  "music": {
+    "_comment": "Provider order auto = Suno -> ElevenLabs -> library. Set SUNO_API_KEY and ELEVENLABS_API_KEY in env or the repo .env (see .env.example). No key -> falls through to the bundled library tracks.",
+    "suno_base": "https://api.sunoapi.org",
+    "suno_model": "V4",
+    "suno_generate_path": "/api/v1/generate",
+    "suno_poll_path": "/api/v1/generate/record-info"
   },
   "video_use_helpers": "~/.claude/skills/video-use/helpers",
   "render_specs": {

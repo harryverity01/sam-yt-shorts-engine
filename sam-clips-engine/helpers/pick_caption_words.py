@@ -34,22 +34,6 @@ SKIP = {"i", "a", "the", "and", "or", "but", "so", "is", "was", "to", "of", "in"
         "you", "your", "we", "they", "be", "are", "have", "had", "has"}
 
 
-
-def _resolve_relative_paths(cfg: dict, brand_assets_path: Path) -> dict:
-    """Resolve any '../path' values in cfg as relative to brand_assets.json's parent."""
-    base = brand_assets_path.parent
-    def walk(o):
-        if isinstance(o, dict):
-            return {k: walk(v) for k, v in o.items()}
-        if isinstance(o, list):
-            return [walk(x) for x in o]
-        if isinstance(o, str) and o.startswith("../"):
-            return str((base / o).resolve())
-        if isinstance(o, str) and o.startswith("~/"):
-            return str(Path(o).expanduser())
-        return o
-    return walk(cfg)
-
 def is_number(word: str) -> bool:
     """Money, percentages, or any token with a digit."""
     clean = word.strip("$£€%,.")

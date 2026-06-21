@@ -44,7 +44,7 @@ The 39 rejects share the opposite property: they were built from "what I imagine
 3. **Identify the platform's actual font**
    - iOS apps: Helvetica / SF Pro (`/System/Library/Fonts/SFNS.ttf` and `/System/Library/Fonts/Helvetica.ttc`)
    - Web tools: usually Inter or similar geometric sans
-   - **NOT Sam's brand fonts** (Bellefair/Montserrat) — those are for Sam-branded wrap assets (handle plug, end card), NOT UI mimicry
+   - **NOT Sam's brand fonts** (Bellefair/Montserrat) — those are for Sam-branded wrap assets (handle plug, lower-thirds), NOT UI mimicry
 
 4. **Build a parameterised renderer**
    Follow the pattern of `build_ig_popup.py` / `build_sam_calendly.py`. Single function `render_<name>(t, dur, **params)` returning a PIL canvas. Driver loops 0→dur, saves PNGs, ffmpeg → ProRes 4444 with alpha.

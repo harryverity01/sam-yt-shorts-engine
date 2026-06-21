@@ -14,6 +14,7 @@ Steps (in order):
      c. Build per-clip EDL + render via video-use render.py (cut + overlay)
      d. Burn captions (burn_captions.py)
      e. Pick + mix music (pick_music.py)
+     f. Finalise — NO end card (Sam removed it)
   6. Output: finished/01_<slug>.mp4 … finished/NN_<slug>.mp4
 
 Usage:
@@ -31,10 +32,20 @@ SKILL_DIR = Path(__file__).parent
 HELPERS = SKILL_DIR / "helpers"
 BRAND_ASSETS = SKILL_DIR / "brand_assets.json"
 
+# video-use helper paths
+VIDEO_USE_HELPERS = Path.home() / ".claude/skills/video-use/helpers"
 
-def _resolve_relative_paths(cfg: dict, brand_assets_path: Path) -> dict:
-    """Resolve any '../path' values in cfg as relative to brand_assets.json's parent."""
-    base = brand_assets_path.parent
+# Our own helpers as importable modules (pure logic: tighten + verify).
+sys.path.insert(0, str(HELPERS))
+import tighten_cut  # noqa: E402  silence-strip + word-snap + time remap
+import verify_cut   # noqa: E402  re-transcribe end protection
+
+
+def _resolve_relative_paths(cfg, brand_assets_path):
+    """Resolve '../x' (relative to brand_assets.json) and '~/x' path values so the
+    SAME code runs on any machine — Harry's absolute paths pass through untouched,
+    Sam's repo-relative '../brand_library' paths resolve to the repo. No-op otherwise."""
+    base = Path(brand_assets_path).resolve().parent
     def walk(o):
         if isinstance(o, dict):
             return {k: walk(v) for k, v in o.items()}
@@ -48,32 +59,8 @@ def _resolve_relative_paths(cfg: dict, brand_assets_path: Path) -> dict:
     return walk(cfg)
 
 
-# Load cfg early so VIDEO_USE_HELPERS can come from brand_assets.json
-_CFG = _resolve_relative_paths(json.load(open(BRAND_ASSETS)), BRAND_ASSETS.resolve())
-VIDEO_USE_HELPERS = Path(_CFG.get("video_use_helpers", Path.home() / ".claude/skills/video-use/helpers"))
-
-
-def _load_env_into_os():
-    """Load the repo-root .env so Sam's ElevenLabs key reaches EVERY downstream
-    step (transcription via video-use AND music) from one place. Only sets keys
-    that aren't already in the environment — an explicit env var always wins.
-
-    Repo root = .../sam-yt-shorts-engine  (this file is in sam-clips-engine/).
-    """
-    repo_env = SKILL_DIR.parent / ".env"
-    if not repo_env.exists():
-        return
-    for line in repo_env.read_text().splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        k, v = line.split("=", 1)
-        k, v = k.strip(), v.strip().strip('"\'')
-        if v and v != "your_elevenlabs_key_here" and k not in os.environ:
-            os.environ[k] = v
-
-
-_load_env_into_os()
+def load_cfg():
+    return _resolve_relative_paths(json.load(open(BRAND_ASSETS)), BRAND_ASSETS)
 
 
 def run(cmd, check=True, capture=False):
@@ -176,7 +163,11 @@ def step4_check_ranked(work_dir: Path, num_clips: int) -> Path:
 │    [{{"id": <int from candidates>, "start": <s>, "end": <s>,      │
 │      "score": <int>, "beat": "<HOOK|STAT|STORY|HOW-TO|REVEAL>", │
 │      "hook_preview": "<first 8 words>",                         │
+│      "cuts": [[<s>,<s>]],  // OPTIONAL filler/repeat to excise   │
 │      "reason": "<2-sentence why this is viral>"}}]                │
+│                                                                  │
+│  Apply the Script quality bar in references/sam_audience.md:    │
+│  open on the hook, every sentence interesting, no filler.       │
 │                                                                  │
 │  Then re-run orchestrator.py with the same args to continue.    │
 ╰─────────────────────────────────────────────────────────────────╯
@@ -192,7 +183,7 @@ def slugify(text: str) -> str:
 def step5_build_clip(idx: int, clip_data: dict, source: Path, transcript: Path,
                       work_dir: Path, args) -> Path | None:
     """Build a single finished clip. Returns output path or None on failure."""
-    cfg = json.load(open(BRAND_ASSETS))
+    cfg = load_cfg()
     slug = slugify(clip_data.get("hook_preview", f"clip_{idx}"))
     clip_id = f"{idx:02d}_{slug}"
     clip_dir = work_dir / "clips" / clip_id
@@ -215,36 +206,98 @@ def step5_build_clip(idx: int, clip_data: dict, source: Path, transcript: Path,
     run(["python3", str(HELPERS / "pick_caption_words.py"),
          str(transcript), str(start), str(end), "-o", str(captions_json)])
 
-    # 5c. Cut clip via video-use (build EDL + render.py)
+    # 5c. Precision cut — silence-stripped, word-snapped, MULTI-range EDL.
+    # The fix for "cuts mid-word / elevator-paced": tighten_cut builds an EDL that
+    # starts/ends on whole words and removes internal silences (Sam edits the same
+    # way — delete the gaps between words). render.py extracts each range with the
+    # grade + 30ms fades baked in and losslessly concatenates them.
     # Sam color grade — locked from build_short.py / the 14 shipped shorts.
-    # ONE grade across every clip; do NOT alternate by beat.
     SAM_GRADE = ("curves=red='0/0 0.5/0.53 1/1':blue='0/0 0.5/0.45 1/1',"
                  "eq=saturation=0.95:contrast=1.03:brightness=0.01")
-    edl = {
-        "version": 1,
-        "sources": {"src": str(source.resolve())},
-        "ranges": [{
-            "source": "src",
-            "start": start - 0.05,   # 50ms pad front
-            "end": end + 0.08,        # 80ms pad back
-            "beat": clip_data.get("beat", "STORY"),
-        }],
-        "grade": SAM_GRADE,  # raw ffmpeg filter — render.py accepts via --filter passthrough
-    }
-    edl_path = clip_dir / "edl.json"
-    json.dump(edl, open(edl_path, "w"), indent=2)
-    cut_landscape = clip_dir / "cut_landscape.mp4"
-    # render.py bakes the grade (from EDL) at landscape res; we re-frame to 9:16 below.
-    run(["python3", str(VIDEO_USE_HELPERS / "render.py"),
-         str(edl_path), "-o", str(cut_landscape),
-         "--no-subtitles"])
-    # Re-frame to 1080x1920 (9:16) — scale to fill height, crop centre
-    cut_mp4 = clip_dir / "cut.mp4"
-    run(["ffmpeg", "-y", "-i", str(cut_landscape),
-         "-vf", "scale=-2:1920,crop=1080:1920",
-         "-c:v", "libx264", "-preset", "medium", "-crf", "18",
-         "-c:a", "copy", "-movflags", "+faststart",
-         str(cut_mp4)])
+    tdata = json.load(open(transcript))
+    twords = tdata.get("words") or tdata.get("word_timestamps") or []
+    drop_ranges = clip_data.get("cuts")  # optional [[s,e],...] of filler Claude flagged
+
+    def _build_and_render(final_tail_pad: float):
+        ranges, meta = tighten_cut.build_tight_ranges(
+            twords, start, end,
+            max_gap=args.max_gap, final_tail_pad=final_tail_pad,
+            drop_ranges=[tuple(d) for d in drop_ranges] if drop_ranges else None,
+        )
+        edl = {
+            "version": 1,
+            "sources": {"src": str(source.resolve())},
+            "ranges": [{"source": "src", "start": r["start"], "end": r["end"]} for r in ranges],
+            "grade": SAM_GRADE,
+            "fps": 25,
+            "_meta": meta,
+        }
+        json.dump(edl, open(clip_dir / "edl.json", "w"), indent=2)
+        cut_landscape = clip_dir / "cut_landscape.mp4"
+        cut_landscape.unlink(missing_ok=True)
+        # render.py caches per-segment extracts by index-based name; on a verify
+        # retry the range ends change but names don't, so wipe its scratch to force
+        # a fresh extract (otherwise the longer tail would be silently ignored).
+        shutil.rmtree(clip_dir / "clips_graded", ignore_errors=True)
+        (clip_dir / "base.mp4").unlink(missing_ok=True)
+        run(["python3", str(VIDEO_USE_HELPERS / "render.py"),
+             str(clip_dir / "edl.json"), "-o", str(cut_landscape), "--no-subtitles"])
+        # Re-frame to 1080x1920 (9:16) — scale to fill height, crop centre
+        cut = clip_dir / "cut.mp4"
+        run(["ffmpeg", "-y", "-i", str(cut_landscape),
+             "-vf", "scale=-2:1920,crop=1080:1920",
+             "-c:v", "libx264", "-preset", "medium", "-crf", "18",
+             "-c:a", "copy", "-movflags", "+faststart", str(cut)])
+        return cut, ranges, meta
+
+    cut_mp4, ranges, meta = _build_and_render(0.18)
+    print(f"  tightened: {len(ranges)} range(s), {meta['out_duration']:.1f}s out "
+          f"(removed {meta['removed_s']:.1f}s of silence/filler)")
+
+    # 5c-verify. Re-listen protection — re-transcribe the cut and confirm the last
+    # word isn't clipped (Sam's #1 complaint). ONE conservative retry with a longer
+    # end tail, capped at +0.3s so it can never bleed the next sentence in.
+    if not args.no_verify:
+        v = verify_cut.verify(cut_mp4, expect_first=meta.get("first_word", ""),
+                              expect_last=meta.get("last_word", ""), edit_dir=clip_dir)
+        json.dump(v, open(clip_dir / "verify.json", "w"), indent=2)
+        if v.get("truncated_end") and v.get("suggest_extra_tail", 0) > 0:
+            extra = min(v["suggest_extra_tail"], 0.3)
+            print(f"  ⚠ end looked clipped (tail={v.get('tail_words')}) — re-cutting +{extra:.2f}s")
+            (clip_dir / "transcripts" / f"{cut_mp4.stem}.json").unlink(missing_ok=True)
+            cut_mp4, ranges, meta = _build_and_render(0.18 + extra)
+            v = verify_cut.verify(cut_mp4, expect_first=meta.get("first_word", ""),
+                                  expect_last=meta.get("last_word", ""), edit_dir=clip_dir)
+            json.dump(v, open(clip_dir / "verify.json", "w"), indent=2)
+            if not v.get("ok"):
+                print(f"  ⚠ still flagged after retry — left for manual review: {v.get('tail_words')}")
+
+    out_dur = meta["out_duration"]
+
+    # Removing silence COMPRESSES the timeline — remap b-roll + caption timings
+    # from source time onto the new output timeline so they stay in sync.
+    overlays_remapped = []
+    for o in json.load(open(overlays_json)):
+        if "End-of-clip handle" in o.get("reason", ""):
+            o["start_in_clip"] = round(max(0.0, out_dur - 3.0), 3)
+            overlays_remapped.append(o)
+            continue
+        ro = tighten_cut.map_src_to_out(start + o["start_in_clip"], ranges)
+        if ro >= out_dur - 0.2:
+            continue  # landed in removed silence past the end — drop it
+        o["start_in_clip"] = ro
+        overlays_remapped.append(o)
+    overlays_remapped.sort(key=lambda o: o["start_in_clip"])
+    json.dump(overlays_remapped, open(overlays_json, "w"), indent=2)
+
+    caps_remapped = []
+    for c in json.load(open(captions_json)):
+        ro = tighten_cut.map_src_to_out(start + c["t"], ranges)
+        if ro >= out_dur - 0.1:
+            continue
+        c["t"] = ro
+        caps_remapped.append(c)
+    json.dump(caps_remapped, open(captions_json, "w"), indent=2)
 
     # 5d. Overlay b-roll graphics — first, render any runtime templates (ig_comment with keyword)
     overlays = json.load(open(overlays_json))
@@ -313,23 +366,23 @@ def step5_build_clip(idx: int, clip_data: dict, source: Path, transcript: Path,
     music_args = ["python3", str(HELPERS / "pick_music.py"),
                   "--clip-transcript", str(transcript),
                   "--clip-start", str(start), "--clip-end", str(end),
-                  "--duration", str(duration),
+                  "--duration", str(out_dur),
                   "-o", str(music_mp3)]
     if args.library_only_music:
         music_args.append("--library-only")
     run(music_args)
 
-    # Mix music under voice at -16dB
+    # Mix music under voice at -16dB (timeline is the tightened out_dur, not raw)
     music_mixed_mp4 = clip_dir / "with_music.mp4"
     run(["ffmpeg", "-y", "-i", str(captioned_mp4), "-i", str(music_mp3),
          "-filter_complex",
-         f"[1:a]volume=-16dB,afade=t=in:st=0:d=0.5,afade=t=out:st={duration - 0.5}:d=0.5[m];"
+         f"[1:a]volume=-16dB,afade=t=in:st=0:d=0.5,afade=t=out:st={max(0.0, out_dur - 0.5)}:d=0.5[m];"
          f"[0:a][m]amix=inputs=2:duration=first:dropout_transition=0[a]",
          "-map", "0:v", "-map", "[a]",
          "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
          "-shortest", str(music_mixed_mp4)])
 
-    # 5f. Finalize (no end card — Sam doesn't want one)
+    # 5f. Finalise — NO end card (Sam's call). Final clip = the music-mixed cut.
     finished_dir = work_dir / "finished"
     finished_dir.mkdir(parents=True, exist_ok=True)
     final = finished_dir / f"{clip_id}.mp4"
@@ -350,13 +403,17 @@ def main():
     ap.add_argument("--target-length", type=float, default=35.0,
                     help="Target clip length in seconds (28-48 valid)")
     ap.add_argument("--library-only-music", action="store_true",
-                    help="Skip ElevenLabs music gen, use library only")
+                    help="Skip Suno/ElevenLabs music gen, use library only")
+    ap.add_argument("--max-gap", type=float, default=0.28,
+                    help="Cut internal silences longer than this (s). Lower = tighter cut.")
+    ap.add_argument("--no-verify", action="store_true",
+                    help="Skip the Scribe re-listen end-protection pass (faster, less safe)")
     ap.add_argument("--start-from", type=int, default=1,
                     help="Resume from clip N (skip 1..N-1, useful for retries)")
     args = ap.parse_args()
 
     args.work_dir.mkdir(parents=True, exist_ok=True)
-    cfg = _CFG  # already loaded + path-resolved at module load
+    cfg = load_cfg()
 
     print(f"\n==== SAM CLIPS ENGINE ====")
     print(f"  input:    {args.input}")
