@@ -80,7 +80,7 @@ payoff. That's exactly how Sam judges a cut.
 
 Default: pick top 12 candidates. User can ask for more/fewer.
 
-**See `references/sam_audience.md` for the audience profile + script quality bar, `references/sam_voice.md` for Sam's spoken voice, and `references/sam_viral_patterns.md` for the 14 already-shipped viral clip patterns to match.**
+**See `references/sam_audience.md` for the audience profile + script quality bar, and `references/sam_viral_patterns.md` for the 14 already-shipped viral clip patterns to match.**
 
 ### Step 3 — Precision cut (silence-stripped + word-snapped + re-listened)
 
@@ -271,7 +271,6 @@ sam-clips-engine/
 │   └── pick_music.py              ← Step 6: Suno → ElevenLabs → library (final step, no end card)
 ├── references/
 │   ├── sam_audience.md            ← Audience + hook patterns + script quality bar + cuts field
-│   ├── sam_voice.md               ← Sam's spoken-voice style (populate from voice memos)
 │   ├── sam_viral_patterns.md      ← The 14 shipped shorts — what worked
 │   ├── brand_library.md           ← Asset catalogue + picker logic + how to add new
 │   └── music_prompts.md           ← Suno/ElevenLabs mood → prompt seed mapping

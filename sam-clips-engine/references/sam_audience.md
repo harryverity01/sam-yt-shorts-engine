@@ -96,13 +96,6 @@ sentence land.
 Leave `cuts` out if the whole window is tight. Don't over-cut — the silence-strip
 already removes pauses; `cuts` is only for whole filler/repeat sentences.
 
-## Sam's spoken voice (style reference)
-
-See `references/sam_voice.md` — a distilled profile of how Sam actually talks, built
-from transcribing his voice memos. Read it when ranking so picks match the lines Sam
-himself would find interesting (not generic "viral" lines). If that file is still a
-stub, fall back to the hook patterns above.
-
 ## What the 14 viral shorts had in common
 
 (Used as reference patterns for the ranker.)
