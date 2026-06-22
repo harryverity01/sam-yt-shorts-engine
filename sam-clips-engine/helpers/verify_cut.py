@@ -69,13 +69,12 @@ def judge(words: list, clip_duration: float, expect_first: str, expect_last: str
 
     last_end = spoken[-1].get("end", clip_duration)
     flush = (clip_duration - last_end) < end_guard
-    # End is truncated if the expected payoff word never came back, or the audio
-    # ends flush on the final word (no breath after it = it was clipped).
-    truncated_end = (not last_ok) or flush
-
-    suggest = 0.0
-    if truncated_end:
-        suggest = 0.2 if not last_ok else 0.12
+    # End is truncated only if the expected payoff word never came back. (We do NOT
+    # trigger on "flush" alone: with onset-based word selection the last kept word is
+    # always rendered in full, and a flush ending is usually just a trailing guest
+    # "Mm-hmm" — retrying on that would extend the tail INTO the interjection.)
+    truncated_end = not last_ok
+    suggest = 0.2 if truncated_end else 0.0
 
     ok = first_ok and last_ok and not truncated_end
     return {

@@ -46,7 +46,14 @@ def _norm(text: str) -> str:
 
 
 def _clip_words(words: list, clip_start: float, clip_end: float) -> list:
-    """Words whose MIDPOINT falls inside the window — clean, no half-words."""
+    """Words selected by START time, so we keep WHOLE words and never bisect one.
+
+    Keying off the start (not the midpoint) means: a word that starts inside the window
+    is kept in full even if it ends just past clip_end (e.g. the payoff word), and a
+    word that started just before clip_start — usually the other speaker's trailing
+    blip — is excluded. Snapping by onset is what stops both clipped payoffs and
+    bled-in guest interjections at the boundaries.
+    """
     out = []
     for w in words:
         if w.get("type", "word") != "word":
@@ -54,8 +61,7 @@ def _clip_words(words: list, clip_start: float, clip_end: float) -> list:
         s, e = w.get("start"), w.get("end")
         if s is None or e is None:
             continue
-        mid = (s + e) / 2.0
-        if clip_start - 1e-6 <= mid <= clip_end + 1e-6:
+        if (clip_start - 0.02) <= s < clip_end:
             out.append(w)
     out.sort(key=lambda w: w["start"])
     return out
@@ -120,6 +126,26 @@ def build_tight_ranges(
         start = run[0]["start"] - lead_pad
         end = run[-1]["end"] + (final_tail_pad if is_last else tail_pad)
         ranges.append({"start": start, "end": end})
+
+    # Stop the outer pads bleeding in the ADJACENT word (usually the other speaker —
+    # e.g. a trailing "Mm-hmm" after the payoff). Clamp the first range's start to just
+    # after the previous spoken word, and the last range's end to just before the next.
+    spoken_all = sorted([w for w in words if w.get("type", "word") == "word"
+                         and w.get("start") is not None and w.get("end") is not None],
+                        key=lambda w: w["start"])
+    prv = next((w for w in reversed(spoken_all) if w["end"] <= kept[0]["start"] + 1e-3
+                and w is not kept[0]), None)
+    nxt = next((w for w in spoken_all if w["start"] >= kept[-1]["end"] - 1e-3
+                and w is not kept[-1]), None)
+    # Guards: never push the start past the first word's onset, and never pull the end
+    # in before the last word fully finishes — so a clamp can trim a neighbour's blip
+    # but can NEVER truncate the clip's own first/last word.
+    if prv is not None:
+        ranges[0]["start"] = max(ranges[0]["start"],
+                                 min(prv["end"] + 0.02, kept[0]["start"] - 0.03))
+    if nxt is not None:
+        ranges[-1]["end"] = min(ranges[-1]["end"],
+                                max(nxt["start"] - 0.02, kept[-1]["end"] + 0.04))
 
     # Clamp: no negative starts, no overlaps after padding (keep_gap of breathing
     # room between runs preserved where the original gap allowed it).

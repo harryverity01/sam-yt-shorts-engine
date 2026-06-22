@@ -31,7 +31,10 @@ IMPERATIVES = {"stop", "don't", "dont", "never", "always", "imagine", "remember"
 # Filler words to NEVER emphasise even if they fit a rule
 SKIP = {"i", "a", "the", "and", "or", "but", "so", "is", "was", "to", "of", "in",
         "on", "at", "for", "with", "from", "by", "as", "if", "it", "that", "this",
-        "you", "your", "we", "they", "be", "are", "have", "had", "has"}
+        "you", "your", "we", "they", "be", "are", "have", "had", "has",
+        # verbal filler / backchannel — never caption these
+        "um", "uh", "uhh", "erm", "mm", "hmm", "mhm", "mmhmm", "mm-hmm", "ah", "oh",
+        "yeah", "yep", "okay", "ok", "right", "like", "just", "really", "actually"}
 
 
 def is_number(word: str) -> bool:
@@ -61,6 +64,7 @@ def pick(transcript_words: list, clip_start: float, clip_end: float,
     picks = []
     n = len(in_clip)
     seen_words = set()
+    hook_done = False  # only ONE hook caption (the first strong word), never 3 stacked
 
     for i, w in enumerate(in_clip):
         text = w.get("text", w.get("word", "")).strip()
@@ -69,8 +73,8 @@ def pick(transcript_words: list, clip_start: float, clip_end: float,
         if norm in SKIP: continue
 
         reason = None
-        if i < 3:
-            reason = "hook"
+        if not hook_done:
+            reason = "hook"; hook_done = True
         elif i == n - 1:
             reason = "payoff"
         elif is_number(text):
@@ -95,7 +99,14 @@ def pick(transcript_words: list, clip_start: float, clip_end: float,
         picks = picks[:max_caps]
         picks.sort(key=lambda p: p["t"])
 
-    return picks
+    # Enforce minimum spacing so caption windows never overlap on screen.
+    # (Final spacing is also enforced post-remap in the orchestrator, since silence
+    # removal can pull two words closer together on the output timeline.)
+    spaced, last_t = [], -99.0
+    for p in sorted(picks, key=lambda x: x["t"]):
+        if p["t"] - last_t >= 1.6:
+            spaced.append(p); last_t = p["t"]
+    return spaced
 
 
 def main():

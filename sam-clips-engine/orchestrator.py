@@ -197,10 +197,12 @@ def step5_build_clip(idx: int, clip_data: dict, source: Path, transcript: Path,
     print(f"\n=== CLIP {clip_id} ===  ({start:.2f}-{end:.2f}s, {duration:.1f}s)")
     print(f"  hook: {clip_data.get('hook_preview', '?')}")
 
-    # 5a. Pick b-roll overlays
+    # 5a. Pick b-roll overlays (skipped with --no-broll — keep the clip clean, just
+    # words on the speaker; logos/lower-thirds don't suit a tight talking-head crop)
     overlays_json = clip_dir / "overlays.json"
-    run(["python3", str(HELPERS / "pick_broll.py"),
-         str(transcript), str(start), str(end), "-o", str(overlays_json)])
+    if not args.no_broll:
+        run(["python3", str(HELPERS / "pick_broll.py"),
+             str(transcript), str(start), str(end), "-o", str(overlays_json)])
 
     # 5b. Pick caption words
     captions_json = clip_dir / "captions.json"
@@ -243,10 +245,19 @@ def step5_build_clip(idx: int, clip_data: dict, source: Path, transcript: Path,
         (clip_dir / "base.mp4").unlink(missing_ok=True)
         run(["python3", str(VIDEO_USE_HELPERS / "render.py"),
              str(clip_dir / "edl.json"), "-o", str(cut_landscape), "--no-subtitles"])
-        # Re-frame to 1080x1920 (9:16) — scale to fill height, crop centre
+        # Re-frame to 1080x1920 (9:16). Crop a 9:16 slice horizontally centred on the
+        # chosen speaker (args.crop_center as a fraction of width) — NOT a naive centre
+        # crop, which on a 2-cam wide shot slices down the middle between both people.
+        pr = subprocess.run(
+            ["ffprobe", "-v", "error", "-select_streams", "v:0",
+             "-show_entries", "stream=width,height", "-of", "csv=p=0:s=x", str(cut_landscape)],
+            capture_output=True, text=True).stdout.strip()
+        lw, lh = (int(x) for x in pr.split("x"))
+        cw = (int(lh * 9 / 16) // 2) * 2           # 9:16 crop width for this height
+        cx = max(0, min(lw - cw, int(lw * args.crop_center - cw / 2)))
         cut = clip_dir / "cut.mp4"
         run(["ffmpeg", "-y", "-i", str(cut_landscape),
-             "-vf", "scale=-2:1920,crop=1080:1920",
+             "-vf", f"crop={cw}:{lh}:{cx}:0,scale=1080:1920,setsar=1",
              "-c:v", "libx264", "-preset", "medium", "-crf", "18",
              "-c:a", "copy", "-movflags", "+faststart", str(cut)])
         return cut, ranges, meta
@@ -277,31 +288,39 @@ def step5_build_clip(idx: int, clip_data: dict, source: Path, transcript: Path,
 
     # Removing silence COMPRESSES the timeline — remap b-roll + caption timings
     # from source time onto the new output timeline so they stay in sync.
-    overlays_remapped = []
-    for o in json.load(open(overlays_json)):
-        if "End-of-clip handle" in o.get("reason", ""):
-            o["start_in_clip"] = round(max(0.0, out_dur - 3.0), 3)
+    if not args.no_broll:
+        overlays_remapped = []
+        for o in json.load(open(overlays_json)):
+            if "End-of-clip handle" in o.get("reason", ""):
+                o["start_in_clip"] = round(max(0.0, out_dur - 3.0), 3)
+                overlays_remapped.append(o)
+                continue
+            ro = tighten_cut.map_src_to_out(start + o["start_in_clip"], ranges)
+            if ro >= out_dur - 0.2:
+                continue  # landed in removed silence past the end — drop it
+            o["start_in_clip"] = ro
             overlays_remapped.append(o)
-            continue
-        ro = tighten_cut.map_src_to_out(start + o["start_in_clip"], ranges)
-        if ro >= out_dur - 0.2:
-            continue  # landed in removed silence past the end — drop it
-        o["start_in_clip"] = ro
-        overlays_remapped.append(o)
-    overlays_remapped.sort(key=lambda o: o["start_in_clip"])
-    json.dump(overlays_remapped, open(overlays_json, "w"), indent=2)
+        overlays_remapped.sort(key=lambda o: o["start_in_clip"])
+        json.dump(overlays_remapped, open(overlays_json, "w"), indent=2)
 
     caps_remapped = []
     for c in json.load(open(captions_json)):
         ro = tighten_cut.map_src_to_out(start + c["t"], ranges)
         if ro >= out_dur - 0.1:
             continue
-        c["t"] = ro
+        c["t"] = round(ro, 3)
         caps_remapped.append(c)
-    json.dump(caps_remapped, open(captions_json, "w"), indent=2)
+    # Enforce ≥1.5s spacing on the OUTPUT timeline so caption windows never overlap
+    # (silence removal can collapse two source words onto nearly the same output time).
+    caps_remapped.sort(key=lambda x: x["t"])
+    spaced_caps, last_ct = [], -99.0
+    for c in caps_remapped:
+        if c["t"] - last_ct >= 1.5:
+            spaced_caps.append(c); last_ct = c["t"]
+    json.dump(spaced_caps, open(captions_json, "w"), indent=2)
 
     # 5d. Overlay b-roll graphics — first, render any runtime templates (ig_comment with keyword)
-    overlays = json.load(open(overlays_json))
+    overlays = [] if args.no_broll else json.load(open(overlays_json))
     brand_lib = Path(cfg["brand_library"])
     for o in overlays:
         if o.get("runtime_render") == "ig_comment":
@@ -331,11 +350,21 @@ def step5_build_clip(idx: int, clip_data: dict, source: Path, transcript: Path,
             if "asset_path" not in o: continue
             t0 = o["start_in_clip"]
             dur = o["duration"]
-            # PTS-shift overlay frame 0 to its window start (Hard Rule 4)
-            filter_chain += (
-                f"[{idx_in}:v]format=yuva444p,setpts=PTS-STARTPTS+{t0}/TB[ov{idx_in}];"
-                f"[{last}][ov{idx_in}]overlay=0:0:enable='between(t,{t0},{t0 + dur})'[v{idx_in}];"
-            )
+            is_img = o["asset_path"].lower().endswith((".png", ".jpg", ".jpeg"))
+            # PTS-shift overlay frame 0 to its window start (Hard Rule 4).
+            # Logos/photos (images) are NOT full-frame — scale them to ~36% width and
+            # place them as a card near the top. Only full-frame .mov concepts (popup,
+            # handle, ig_comment) overlay edge-to-edge at 0:0.
+            if is_img:
+                filter_chain += (
+                    f"[{idx_in}:v]format=yuva444p,scale=390:-2,setpts=PTS-STARTPTS+{t0}/TB[ov{idx_in}];"
+                    f"[{last}][ov{idx_in}]overlay=(W-w)/2:170:enable='between(t,{t0},{t0 + dur})'[v{idx_in}];"
+                )
+            else:
+                filter_chain += (
+                    f"[{idx_in}:v]format=yuva444p,setpts=PTS-STARTPTS+{t0}/TB[ov{idx_in}];"
+                    f"[{last}][ov{idx_in}]overlay=0:0:enable='between(t,{t0},{t0 + dur})'[v{idx_in}];"
+                )
             last = f"v{idx_in}"
             idx_in += 1
         filter_chain = filter_chain.rstrip(";")
@@ -362,28 +391,32 @@ def step5_build_clip(idx: int, clip_data: dict, source: Path, transcript: Path,
     run(["python3", str(HELPERS / "burn_captions.py"),
          str(overlay_mp4), str(captions_json), "-o", str(captioned_mp4)])
 
-    # 5e. Music
-    music_mp3 = clip_dir / "music.mp3"
-    music_args = ["python3", str(HELPERS / "pick_music.py"),
-                  "--clip-transcript", str(transcript),
-                  "--clip-start", str(start), "--clip-end", str(end),
-                  "--duration", str(out_dur),
-                  "-o", str(music_mp3)]
-    if args.library_only_music:
-        music_args.append("--library-only")
-    run(music_args)
+    # 5e. Music (skippable with --no-music — final = the captioned cut, voice only)
+    if args.no_music:
+        print("  (--no-music: skipping music gen + mix)")
+        music_mixed_mp4 = captioned_mp4
+    else:
+        music_mp3 = clip_dir / "music.mp3"
+        music_args = ["python3", str(HELPERS / "pick_music.py"),
+                      "--clip-transcript", str(transcript),
+                      "--clip-start", str(start), "--clip-end", str(end),
+                      "--duration", str(out_dur),
+                      "-o", str(music_mp3)]
+        if args.library_only_music:
+            music_args.append("--library-only")
+        run(music_args)
 
-    # Mix music under voice at -16dB (timeline is the tightened out_dur, not raw)
-    music_mixed_mp4 = clip_dir / "with_music.mp4"
-    run(["ffmpeg", "-y", "-i", str(captioned_mp4), "-i", str(music_mp3),
-         "-filter_complex",
-         f"[1:a]volume=-16dB,afade=t=in:st=0:d=0.5,afade=t=out:st={max(0.0, out_dur - 0.5)}:d=0.5[m];"
-         f"[0:a][m]amix=inputs=2:duration=first:dropout_transition=0[a]",
-         "-map", "0:v", "-map", "[a]",
-         "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
-         "-shortest", str(music_mixed_mp4)])
+        # Mix music under voice at -16dB (timeline is the tightened out_dur, not raw)
+        music_mixed_mp4 = clip_dir / "with_music.mp4"
+        run(["ffmpeg", "-y", "-i", str(captioned_mp4), "-i", str(music_mp3),
+             "-filter_complex",
+             f"[1:a]volume=-16dB,afade=t=in:st=0:d=0.5,afade=t=out:st={max(0.0, out_dur - 0.5)}:d=0.5[m];"
+             f"[0:a][m]amix=inputs=2:duration=first:dropout_transition=0[a]",
+             "-map", "0:v", "-map", "[a]",
+             "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+             "-shortest", str(music_mixed_mp4)])
 
-    # 5f. Finalise — NO end card (Sam's call). Final clip = the music-mixed cut.
+    # 5f. Finalise — NO end card (Sam's call).
     finished_dir = work_dir / "finished"
     finished_dir.mkdir(parents=True, exist_ok=True)
     final = finished_dir / f"{clip_id}.mp4"
@@ -405,6 +438,14 @@ def main():
                     help="Target clip length in seconds (28-48 valid)")
     ap.add_argument("--library-only-music", action="store_true",
                     help="Skip Suno/ElevenLabs music gen, use library only")
+    ap.add_argument("--no-music", action="store_true",
+                    help="No music at all — final clip is voice-only (captioned cut)")
+    ap.add_argument("--no-broll", action="store_true",
+                    help="No b-roll/logos/lower-thirds — just the cropped speaker + captions")
+    ap.add_argument("--crop-center", type=float, default=0.5,
+                    help="Horizontal centre of the 9:16 crop as a fraction of source width "
+                         "(0=left, 0.5=centre, 1=right). For a 2-cam pod, point it at the "
+                         "speaker — e.g. 0.22 if Sam sits on the left.")
     ap.add_argument("--max-gap", type=float, default=0.28,
                     help="Cut internal silences longer than this (s). Lower = tighter cut.")
     ap.add_argument("--no-verify", action="store_true",
