@@ -166,8 +166,9 @@ def step4_check_ranked(work_dir: Path, num_clips: int) -> Path:
 │      "cuts": [[<s>,<s>]],  // OPTIONAL filler/repeat to excise   │
 │      "reason": "<2-sentence why this is viral>"}}]                │
 │                                                                  │
-│  Apply the Script quality bar in references/sam_audience.md:    │
-│  open on the hook, every sentence interesting, no filler.       │
+│  Rules (references/sam_audience.md): clips must be SAM-DOMINANT │
+│  (mostly Sam talking, guest only a short interjection); open on │
+│  the hook; every sentence interesting; no filler.              │
 │                                                                  │
 │  Then re-run orchestrator.py with the same args to continue.    │
 ╰─────────────────────────────────────────────────────────────────╯

@@ -63,6 +63,7 @@ This means the skill is portable across any Claude Code subscription with no API
 **The Sam viral rubric** (Claude follows this when scoring):
 
 **Sam viral rubric** (the editor sub-agent brief uses this):
+- **SAM-DOMINANT (non-negotiable)** — it's Sam's channel, so the clip must be **mostly Sam talking** (≥~80% of the words); a guest only interjects. Never ship a guest-monologue clip. When clipping an interview, identify Sam by **content, not the diarisation label** (Scribe speaker tags aren't consistent across a long/chunked file).
 - **Hook strength** — first 3 words pull the viewer (specific number, contrarian claim, "I lost", "$30K in 2 days", "everyone tells you")
 - **Self-contained payoff** — clip resolves without needing context from the rest of the interview
 - **Specific claims** — concrete dollar amounts, dates, names, places, mechanisms (NOT abstractions like "mindset" or "value")

@@ -61,6 +61,24 @@ Used by `pick_moments.py` to score viral candidates.
 
 A clip lands strongest when it sits clearly in one lane and resolves with a concrete claim.
 
+## Whose clip is it? — SAM-DOMINANT rule (non-negotiable)
+
+This is **Sam's** channel. Every clip must be **mostly Sam talking** — Sam making the
+point, telling the story, or teaching. A guest may appear only as a SHORT interjection
+(a question, a "Mm-hmm", a one-liner). **Never ship a guest-monologue clip** — even if
+the guest's line is brilliant, it's the wrong channel for it.
+
+When clipping an interview/podcast:
+- Target stretches where **Sam holds the floor for most of the 30–45s (≥ ~80% of the words)**.
+- Pick Sam's takes / teaching / stories — not the guest's.
+- The guest's line can be the *setup* Sam reacts to, but Sam must carry the clip.
+
+**Diarisation caveat:** work out who Sam is by **content, not by the speaker label.**
+Scribe's `speaker_0`/`speaker_1` are NOT consistent across a long file (and definitely
+not across a chunked transcript). Anchor on what's actually said — Sam is the host / the
+brand voice (his lanes: pricing, content systems, AI automation, personal brand) — and
+verify before trusting any speaker tag.
+
 ## Script quality bar (apply when ranking AND when trimming a clip)
 
 This is how Sam judges a cut. A clip only ships if it clears every line:
