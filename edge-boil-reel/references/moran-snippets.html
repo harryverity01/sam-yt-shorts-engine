@@ -1,0 +1,77 @@
+<!-- moran-motion-toolkit — copy-paste CSS/SVG/JS for a Playwright-rendered stage.html.
+     Drop the bits you need into the reel's stage. All deterministic (driven by seek(t)). -->
+
+<style>
+/* ---- #1 EDITORIAL LAYERED BACKGROUND (use on almost any reel) ---- */
+.bg{position:absolute;inset:0;background:#1a1a1a;overflow:hidden;}
+.bg .img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  filter:grayscale(1) brightness(0.5) contrast(0.85);opacity:.5;mix-blend-mode:screen;}
+.bg .tint{position:absolute;inset:0;background:linear-gradient(160deg,#242424,#141414);mix-blend-mode:multiply;opacity:.6;}
+
+/* ---- #2 TEXTURE INTEGRATION (blend + filter, never opacity) ---- */
+.tex{position:absolute;inset:0;mix-blend-mode:overlay;filter:contrast(1.15) brightness(1.05);pointer-events:none;}
+.tex img{width:100%;height:100%;object-fit:cover;}
+
+/* ---- #3 INK-BLEED REVEAL (luma matte; swap .ink mask frame in seek) ---- */
+.reveal{ -webkit-mask-size:cover;mask-size:cover; -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat; }
+
+/* ---- #6 GRAIN + VIGNETTE (always-on documentary finish) ---- */
+.grain{position:absolute;inset:0;width:100%;height:100%;opacity:.10;pointer-events:none;}
+#vignette{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,0) 56%,rgba(0,0,0,0.38) 100%);}
+</style>
+
+<!-- grain layer (place near top of stacking order, after content) -->
+<svg class="grain"><filter id="gr"><feTurbulence id="grainT" type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="1"/>
+  <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.9 0"/></filter>
+  <rect width="1080" height="1920" filter="url(#gr)"/></svg>
+<div id="vignette"></div>
+
+<!-- ---- #4 EDGE-BOIL filter (annotations reference filter="url(#boil)") ---- -->
+<svg width="0" height="0"><filter id="boil" x="-20%" y="-20%" width="140%" height="140%">
+  <feTurbulence id="boilT1" type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="1" result="t1"/>
+  <feDisplacementMap in="SourceGraphic" in2="t1" scale="16" result="d1"/>
+  <feTurbulence id="boilT2" type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="11" result="t2"/>
+  <feDisplacementMap in="d1" in2="t2" scale="7"/></filter></svg>
+
+<script>
+// ============ shared helpers (most reels already have these) ============
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const lerp=(a,b,t)=>a+(b-a)*t;
+
+// ---- #4/#5 boil + grain + dust seed stepping (call inside seek(t)) ----
+function stepSeeds(t){
+  const s=1+Math.floor(t*4)%7;                       // edge boil: 4 reseeds/sec
+  boilT1.setAttribute('seed',s); boilT2.setAttribute('seed',s+13);
+  grainT.setAttribute('seed',1+Math.floor(t*8)%11);  // grain flicker
+  // if a #dustT exists (analog photo): dustT.setAttribute('seed',1+Math.floor(t*7)%9);
+}
+
+// ---- #5 ANALOG PHOTO treatment: build a .pframe = photo + blur clone + dust + vignette ----
+// .pframe{overflow:hidden} .pframe img.blurclone{filter:blur(7px);
+//   mask-image:radial-gradient(ellipse 58% 48% at 42% 38%,transparent 36%,black 78%)}
+// .pframe .pvin{background:radial-gradient(ellipse 75% 65% at 42% 38%,rgba(0,0,0,0) 45%,rgba(0,0,0,.42) 100%)}
+// dust: <svg><filter><feTurbulence baseFrequency=.4/><feColorMatrix .. 6 6 6 -7.2 0></filter></svg> mix-blend:screen opacity:.28
+
+// ---- #6 JITTER (stop-motion snap; NOT smooth wiggle). Reserve for cutouts/stickers/titles ----
+function jitter(el,t,amp=6,rotAmp=1.5,fps=8){
+  const step=Math.floor(t*fps);
+  const r=s=>{const x=Math.sin(s*999.7)*43758.5;return (x-Math.floor(x))*2-1;};
+  el.style.transform=`translate(${r(step)*amp}px,${r(step+7)*amp}px) rotate(${r(step+3)*rotAmp}deg)`;
+}
+
+// ---- #3 INK REVEAL: swap the mask frame each render frame ----
+function inkReveal(el,prefix,nframes,fps,t,t0){
+  const i=clamp(Math.floor((t-t0)*fps)+1,1,nframes);
+  const u=`${prefix}_${String(i).padStart(3,'0')}.png`;
+  if(el.dataset.ink!==u){ el.style.webkitMaskImage=`url(${u})`; el.style.maskImage=`url(${u})`; el.dataset.ink=u; }
+}
+
+// ---- #1 slow Ken Burns drift for bg layers (call in seek) ----
+function drift(el,t,t0,dur,fromScale,toScale,fromX,toX){
+  const p=clamp((t-t0)/dur,0,1);
+  el.style.transform=`translateX(${lerp(fromX,toX,p)}px) scale(${lerp(fromScale,toScale,p)})`;
+}
+// ---- #7 CUT ON ACTION: not code — align beat boundaries so the outgoing beat is still
+//        animating (zoom/draw/slam) at the cut. Never cut on a held still frame. ----
+</script>
