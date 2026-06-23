@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="fonts/all.css">
+<style>
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1080px; height:1920px; overflow:hidden; background:#2b241c; }
+  #stage { position:absolute; width:1080px; height:1920px; overflow:hidden; }
+
+  .beat { position:absolute; inset:0; opacity:0; }
+  .kraft { position:absolute; inset:0;
+    background:
+      radial-gradient(ellipse at 50% 35%, rgba(255,244,214,0.10), rgba(0,0,0,0.38)),
+      linear-gradient(160deg, #8a7355, #6d5a40 55%, #57462f);
+  }
+  .kraftnoise { position:absolute; inset:0; width:100%; height:100%; opacity:0.5; }
+
+  .card { position:absolute; background:#fff; box-shadow: 0 30px 70px rgba(0,0,0,0.55); }
+  .card img { display:block; width:100%; }
+
+  .pill { position:absolute; white-space:nowrap; font-family:'Inter'; font-weight:700; color:#fff; background:rgba(10,10,10,0.92);
+          padding:14px 30px; border-radius:14px; letter-spacing:0.06em; }
+
+  .bigtext { position:absolute; width:100%; text-align:center; font-family:'Inter'; font-weight:800; color:#fff;
+             text-shadow: 0 6px 30px rgba(0,0,0,0.65), 0 2px 8px rgba(0,0,0,0.8); }
+
+  .doc { position:absolute; left:50px; width:980px; background:#f6f0e0;
+         box-shadow:0 36px 90px rgba(0,0,0,0.6); padding:70px 64px; }
+  .doc .label { font-family:'IBM Plex Mono'; font-weight:600; font-size:25px; letter-spacing:0.14em; color:#8a2c1d; }
+  .doc .rule { height:3px; background:#1d1a14; margin:26px 0; }
+  .doc .rule.thin { height:1px; margin:12px 0; }
+  .doc h1 { font-family:'Old Standard TT'; font-weight:700; font-size:74px; line-height:1.04; color:#171310; }
+  .doc h2 { font-family:'Old Standard TT'; font-size:40px; line-height:1.25; color:#332d24; }
+  .doc .quote { font-family:'Old Standard TT'; font-size:67px; line-height:1.38; color:#171310; }
+  .doc .attr { font-family:'IBM Plex Mono'; font-size:26px; color:#5c5648; }
+
+  .stamp { position:absolute; font-family:'IBM Plex Mono'; font-weight:600; color:#b3261e;
+           border:6px solid #b3261e; padding:12px 28px; border-radius:8px; letter-spacing:0.1em;
+           background:rgba(246,240,224,0.25); }
+
+  .hand { position:absolute; font-family:'Caveat'; font-weight:700; color:#ffffff;
+          text-shadow:0 3px 14px rgba(0,0,0,0.8); }
+  .hand.dark { color:#15130f; text-shadow:none; }
+
+  svg.anno { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+  .grain { position:absolute; inset:0; width:100%; height:100%; opacity:0.10; pointer-events:none; }
+  #vignette { position:absolute; inset:0; pointer-events:none;
+    background: radial-gradient(ellipse at 50% 46%, rgba(0,0,0,0) 58%, rgba(0,0,0,0.34) 100%); }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- ============ BEAT 1 : modern panic 0-5 ============ -->
+  <div class="beat" id="b1">
+    <div class="kraft"></div>
+    <svg class="kraftnoise"><filter id="kn1"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7"/><feColorMatrix type="matrix" values="0 0 0 0 0.42  0 0 0 0 0.35  0 0 0 0 0.24  0 0 0 0.55 0"/></filter><rect width="1080" height="1920" filter="url(#kn1)"/></svg>
+    <div id="b1zoom" style="position:absolute;inset:0;">
+      <div class="pill" id="b1pill" style="top:285px;left:50%;transform:translateX(-50%);font-size:34px;">THIS WEEK, EVERYWHERE:</div>
+      <div class="card" id="tcCard" style="top:560px;left:80px;width:920px;transform:rotate(-2.4deg);">
+        <img src="assets/crop-techcrunch.png">
+        <div style="position:absolute;left:0;bottom:-54px;font-family:'IBM Plex Mono';font-size:24px;color:rgba(255,255,255,0.85);">techcrunch.com · 9 June 2026</div>
+      </div>
+      <div class="card" id="cnCard" style="top:1075px;left:55px;width:970px;transform:rotate(1.7deg);">
+        <img src="assets/crop-cnbc.png">
+      </div>
+      <div class="bigtext" id="b1hook" style="top:1565px;font-size:118px;">“AGI IS HERE.”</div>
+      <svg class="anno" id="b1anno">
+        <g filter="url(#boil)">
+          <ellipse class="draw" id="b1circ" cx="430" cy="785" rx="330" ry="72" fill="none" stroke="#e03020" stroke-width="11"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ============ BEAT 2 : 1958 reveal 5-10 ============ -->
+  <div class="beat" id="b2">
+    <div class="kraft"></div>
+    <svg class="kraftnoise"><rect width="1080" height="1920" filter="url(#kn1)"/></svg>
+    <div id="b2zoom" style="position:absolute;inset:0;">
+      <div class="doc" id="b2doc" style="top:330px;transform:rotate(-1.2deg);min-height:1250px;">
+        <div class="label">REPORTED IN THE NEW YORK TIMES · JULY 8, 1958</div>
+        <div class="rule"></div>
+        <h1 id="b2h1">NEW NAVY DEVICE<br><span id="b2target">LEARNS BY DOING</span></h1>
+        <div class="rule thin"></div>
+        <h2>Psychologist Shows Embryo of Computer Designed to Read and Grow Wiser — WASHINGTON, July 7 (UPI)</h2>
+        <div style="height:34px"></div>
+        <div class="quote" style="font-size:54px;">The Navy revealed the embryo of an electronic computer today that it expects will be able to…</div>
+      </div>
+      <div class="hand" id="b2hand" style="top:1470px;left:90px;font-size:56px;transform:rotate(-3deg);">this is a neural network — in 1958</div>
+      <svg class="anno">
+        <g filter="url(#boil)">
+          <ellipse class="draw" id="b2circ" cx="540" cy="700" rx="425" ry="90" fill="none" stroke="#2a36c8" stroke-width="12"/>
+          <path class="draw" id="b2arrow" d="M 175 1440 C 130 1230, 140 1000, 255 800" fill="none" stroke="#ffffff" stroke-width="10"/>
+          <path class="draw" id="b2arrowhead" d="M 200 845 L 255 800 L 270 870" fill="none" stroke="#ffffff" stroke-width="10"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ============ BEAT 3 : the quote 10-17 ============ -->
+  <div class="beat" id="b3">
+    <div class="kraft"></div>
+    <svg class="kraftnoise"><rect width="1080" height="1920" filter="url(#kn1)"/></svg>
+    <div id="b3zoom" style="position:absolute;inset:0;">
+      <div class="doc" id="b3doc" style="top:330px;transform:rotate(0.8deg);min-height:980px;">
+        <div class="label">THE NEW YORK TIMES · JULY 8, 1958 · PAGE 25</div>
+        <div class="rule"></div>
+        <div class="quote">“…the embryo of an electronic computer that it expects will be able to <span id="q1">walk, talk, see, write,</span> <span id="q2">reproduce itself</span> and be <span id="q3">conscious of its existence.</span>”</div>
+        <div style="height:42px"></div>
+        <div class="attr">— the United States Navy, as reported on page 25</div>
+      </div>
+      <div class="stamp" id="b3stamp" style="top:1135px;left:330px;font-size:54px;transform:rotate(-7deg);">VERBATIM · 1958</div>
+      <svg class="anno">
+        <g filter="url(#boil)">
+          <path class="draw" id="u1" fill="none" stroke="rgba(214,40,40,0.62)" stroke-width="30" stroke-linecap="round"/>
+          <path class="draw" id="u2" fill="none" stroke="rgba(214,40,40,0.62)" stroke-width="30" stroke-linecap="round"/>
+          <path class="draw" id="u3" fill="none" stroke="rgba(214,40,40,0.62)" stroke-width="30" stroke-linecap="round"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ============ BEAT 4 : reality 17-22 ============ -->
+  <div class="beat" id="b4">
+    <div class="kraft"></div>
+    <svg class="kraftnoise"><rect width="1080" height="1920" filter="url(#kn1)"/></svg>
+    <div id="b4zoom" style="position:absolute;inset:0;">
+      <div class="card" id="b4photoCard" style="top:170px;left:120px;width:840px;transform:rotate(-1.4deg);background:#0c0c0c;">
+        <img id="b4img" src="clipframes/f_001.jpg" style="filter:grayscale(1) contrast(1.06);">
+        <div style="position:absolute;left:18px;bottom:14px;font-family:'IBM Plex Mono';font-size:22px;color:rgba(255,255,255,0.78);">U.S. Navy photo · Mark I Perceptron · public domain</div>
+      </div>
+      <div class="pill" id="b4pill1" style="top:1665px;left:50%;transform:translateX(-50%);font-size:40px;">THE ACTUAL MACHINE: 400 PHOTOCELLS</div>
+      <div class="hand" id="b4hand" style="top:1395px;left:150px;font-size:60px;transform:rotate(-2.5deg);">it could tell left from right. that’s it.</div>
+      <svg class="anno">
+        <g filter="url(#boil)">
+          <path class="draw" id="b4scrib" d="M 420 700 L 800 580 L 440 820 L 830 700 L 470 950 L 850 830" fill="none" stroke="#e03020" stroke-width="13" stroke-linejoin="round"/>
+          <path class="draw" id="b4arrow" d="M 235 1560 C 250 1430, 280 1300, 380 1160" fill="none" stroke="#ffffff" stroke-width="10"/>
+          <path class="draw" id="b4ah" d="M 335 1205 L 380 1160 L 396 1230" fill="none" stroke="#ffffff" stroke-width="10"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ============ BEAT 5 : 68 years apart 22-27 ============ -->
+  <div class="beat" id="b5">
+    <div class="kraft"></div>
+    <svg class="kraftnoise"><rect width="1080" height="1920" filter="url(#kn1)"/></svg>
+    <div id="b5zoom" style="position:absolute;inset:0;">
+      <div class="doc" id="b5doc" style="top:360px;left:60px;width:960px;padding:46px 50px;transform:rotate(-1.8deg);">
+        <div class="label" style="font-size:21px;">THE NEW YORK TIMES · 1958</div>
+        <div class="rule" style="margin:16px 0;"></div>
+        <h1 style="font-size:58px;">“…WALK, TALK, SEE, WRITE… AND BE CONSCIOUS OF ITS EXISTENCE”</h1>
+      </div>
+      <div class="card" id="b5tc" style="top:1055px;left:75px;width:930px;transform:rotate(1.9deg);">
+        <img src="assets/crop-techcrunch.png">
+        <div style="position:absolute;left:0;bottom:-50px;font-family:'IBM Plex Mono';font-size:24px;color:rgba(255,255,255,0.85);">techcrunch.com · 2026</div>
+      </div>
+      <div class="pill" id="b5stamp" style="top:900px;left:50%;transform:translateX(-50%) rotate(-2deg);font-size:56px;background:#b3261e;padding:18px 44px;">68 YEARS APART</div>
+      <svg class="anno">
+        <g filter="url(#boil)">
+          <ellipse class="draw" id="b5c1" cx="540" cy="555" rx="450" ry="195" fill="none" stroke="#2a36c8" stroke-width="12"/>
+          <ellipse class="draw" id="b5c2" cx="540" cy="1305" rx="430" ry="175" fill="none" stroke="#e03020" stroke-width="12"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ============ BEAT 6 : payoff 27-32 ============ -->
+  <div class="beat" id="b6">
+    <div class="kraft"></div>
+    <svg class="kraftnoise"><rect width="1080" height="1920" filter="url(#kn1)"/></svg>
+    <div id="b6zoom" style="position:absolute;inset:0;">
+      <div class="card" style="top:330px;left:-60px;width:560px;transform:rotate(-7deg);opacity:0.92;">
+        <img src="assets/crop-cnbc.png">
+      </div>
+      <div class="card" style="top:300px;left:620px;width:520px;transform:rotate(5deg);opacity:0.92;background:#0c0c0c;">
+        <img src="assets/mark1-perceptron-navy.jpg" style="filter:grayscale(1);">
+      </div>
+      <div class="doc" id="b6card" style="top:705px;left:75px;width:930px;padding:90px 70px;transform:rotate(-0.8deg);text-align:center;">
+        <div style="font-family:'Fraunces';font-weight:900;font-size:96px;line-height:1.06;color:#171310;" id="b6t1">Hype is a terrible timer.</div>
+        <div style="height:36px"></div>
+        <div style="font-family:'Fraunces';font-weight:900;font-size:96px;line-height:1.06;color:#b3261e;" id="b6t2">But a decent compass.</div>
+        <div style="height:54px"></div>
+        <div style="font-family:'IBM Plex Mono';font-size:30px;color:#5c5648;" id="b6t3">bet on the direction, not the deadline</div>
+      </div>
+      <div id="b6sig" style="position:absolute;top:1610px;width:100%;text-align:center;">
+        <!-- Channel handle on the payoff card. To add a logo, drop a PNG in the work dir and
+             prepend: <img src="logo.png" style="width:104px;vertical-align:middle;margin-right:22px;"> -->
+        <span style="font-family:'Inter';font-weight:700;font-size:44px;color:#fff;vertical-align:middle;">@sameyeam.secrets</span>
+      </div>
+      <svg class="anno">
+        <g filter="url(#boil)">
+          <path class="draw" id="b6u" fill="none" stroke="rgba(214,40,40,0.85)" stroke-width="14" stroke-linecap="round" d="M 250 1245 C 420 1262, 700 1262, 845 1248"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- global grain + vignette -->
+  <svg class="grain"><filter id="gr"><feTurbulence id="grainT" type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="1"/><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.9 0"/></filter><rect width="1080" height="1920" filter="url(#gr)"/></svg>
+  <div id="vignette"></div>
+
+  <!-- shared boil filter -->
+  <svg width="0" height="0">
+    <filter id="boil" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence id="boilT1" type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="1" result="t1"/>
+      <feDisplacementMap in="SourceGraphic" in2="t1" scale="16" result="d1"/>
+      <feTurbulence id="boilT2" type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="11" result="t2"/>
+      <feDisplacementMap in="d1" in2="t2" scale="7"/>
+    </filter>
+  </svg>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const clamp = (x,a,b)=>Math.max(a,Math.min(b,x));
+const lerp=(a,b,t)=>a+(b-a)*t;
+// progress in [t0,t1]
+const P=(t,t0,t1)=>clamp((t-t0)/(t1-t0),0,1);
+const easeOut=p=>1-Math.pow(1-p,3);
+const easeInOut=p=>p<0.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;
+const back=p=>{const c=2.2;const q=p-1;return 1+(c+1)*q*q*q+c*q*q;};
+
+function slam(el,t,t0,dur=0.32,rot=0){
+  const p=P(t,t0,t0+dur);
+  el.style.opacity=p<=0?0:1;
+  const s=lerp(1.55,1,back(p));
+  const base=el.dataset.rot||rot;
+  el.style.transform=`rotate(${base}deg) scale(${s})`;
+}
+function fadeUp(el,t,t0,dur=0.45,dy=60){
+  const p=easeOut(P(t,t0,t0+dur));
+  el.style.opacity=p;
+  el.style.transform=(el.dataset.xform||'')+` translateY(${(1-p)*dy}px)`;
+}
+function stampIn(el,t,t0,rot){
+  const p=P(t,t0,t0+0.28);
+  el.style.opacity=p<=0?0:1;
+  const s=lerp(2.6,1,easeOut(p));
+  el.style.transform=`rotate(${rot}deg) scale(${s})`;
+}
+function draw(el,t,t0,t1){
+  if(!el._len){ el._len = el.getTotalLength ? el.getTotalLength() : 0; el.style.strokeDasharray=el._len; }
+  const p=easeInOut(P(t,t0,t1));
+  el.style.strokeDashoffset=el._len*(1-p);
+  el.style.opacity = p<=0?0:1;
+}
+
+function setUnderlines(){
+  // build underline paths from span rects (q1,q2,q3) relative to #b3zoom
+  const zoom=$('b3zoom').getBoundingClientRect();
+  [['q1','u1'],['q2','u2'],['q3','u3']].forEach(([qs,us])=>{
+    const r=$(qs).getClientRects();
+    let d='';
+    for(const box of r){
+      const y=box.bottom-zoom.top-6;
+      d+=`M ${box.left-zoom.left-8} ${y} L ${box.right-zoom.left+8} ${y+4} `;
+    }
+    $(us).setAttribute('d',d.trim());
+    $(us)._len=null;
+  });
+  // blue circle around "LEARNS BY DOING" in b2
+  const z2=$('b2zoom').getBoundingClientRect();
+  const tb=$('b2target').getBoundingClientRect();
+  const c=$('b2circ');
+  c.setAttribute('cx',(tb.left+tb.right)/2-z2.left);
+  c.setAttribute('cy',(tb.top+tb.bottom)/2-z2.top);
+  c.setAttribute('rx',tb.width/2+55);
+  c.setAttribute('ry',tb.height/2+42);
+  c._len=null;
+  // b5 circles from card rects
+  const z5=$('b5zoom').getBoundingClientRect();
+  [['b5doc','b5c1',0.92,0.78],['b5tc','b5c2',0.86,0.72]].forEach(([cardId,cid,fx,fy])=>{
+    const r=$(cardId).getBoundingClientRect();
+    const e=$(cid);
+    e.setAttribute('cx',(r.left+r.right)/2-z5.left);
+    e.setAttribute('cy',(r.top+r.bottom)/2-z5.top);
+    e.setAttribute('rx',r.width/2*fx+30);
+    e.setAttribute('ry',r.height/2*fy+34);
+    e._len=null;
+  });
+}
+
+const HFCLIP = {dir:'clipframes', count: window.HF_COUNT||0, fps: 24}; // populated when higgsfield frames exist
+
+function seek(t){
+  // boil seeds step 4x/sec
+  const seed=1+Math.floor(t*4)%7;
+  $('boilT1').setAttribute('seed',seed);
+  $('boilT2').setAttribute('seed',seed+13);
+  $('grainT').setAttribute('seed',1+Math.floor(t*8)%11);
+
+  // beat visibility
+  const beats={b1:[0,5],b2:[5,10],b3:[10,17],b4:[17,22],b5:[22,27],b6:[27,32.5]};
+  for(const [id,[a,b]] of Object.entries(beats))
+    $(id).style.opacity=(t>=a&&t<b)?1:0;
+
+  // ---- B1
+  if(t<5.2){
+    $('b1zoom').style.transform=`scale(${lerp(1.0,1.07,t/5)})`;
+    $('b1pill').dataset.xform='translateX(-50%)';
+    fadeUp($('b1pill'),t,0.25);
+    slam($('tcCard'),t,0.55); $('tcCard').dataset.rot=-2.4;
+    slam($('cnCard'),t,1.55); $('cnCard').dataset.rot=1.7;
+    draw($('b1circ'),t,2.5,3.4);
+    const hp=P(t,3.6,3.85);
+    $('b1hook').style.opacity=hp;
+    $('b1hook').style.transform=`scale(${lerp(1.7,1,easeOut(hp))})`;
+  }
+  // ---- B2
+  if(t>=4.8&&t<10.4){
+    const u=t-5;
+    $('b2zoom').style.transform=`scale(${lerp(1.06,1.0,easeOut(P(u,0,0.5)))}) scale(${lerp(1,1.05,u/5)})`;
+    draw($('b2circ'),t,5.7,6.7);
+    draw($('b2arrow'),t,7.3,7.9);
+    draw($('b2arrowhead'),t,7.85,8.1);
+    $('b2hand').dataset.xform='rotate(-3deg)';
+    fadeUp($('b2hand'),t,7.9,0.4,30);
+  }
+  // ---- B3
+  if(t>=9.8&&t<17.4){
+    const u=t-10;
+    $('b3zoom').style.transform=`translateY(${lerp(0,-90,u/7)}px) scale(${lerp(1.0,1.10,easeInOut(u/7))})`;
+    draw($('u1'),t,10.5,11.7);
+    draw($('u2'),t,12.5,13.4);
+    draw($('u3'),t,14.5,15.6);
+    stampIn($('b3stamp'),t,16.1,-7);
+  }
+  // ---- B4
+  if(t>=16.8&&t<22.4){
+    const u=t-17;
+    $('b4zoom').style.transform=`scale(${lerp(1.0,1.08,u/5)})`;
+    // higgsfield frame swap
+    if(HFCLIP.count>0){
+      const idx=clamp(Math.floor(u*HFCLIP.fps)+1,1,HFCLIP.count);
+      const want=`${HFCLIP.dir}/f_${String(idx).padStart(3,'0')}.jpg`;
+      const img=$('b4img');
+      if(img.dataset.cur!==want){ img.src=want; img.dataset.cur=want; }
+    }
+    draw($('b4scrib'),t,18.1,19.2);
+    draw($('b4arrow'),t,19.4,19.9);
+    draw($('b4ah'),t,19.95,20.15);
+    $('b4hand').dataset.xform='rotate(-2.5deg)';
+    fadeUp($('b4hand'),t,20.0,0.4,30);
+    $('b4pill1').dataset.xform='translateX(-50%)';
+    fadeUp($('b4pill1'),t,18.4,0.4,40);
+  }
+  // ---- B5
+  if(t>=21.8&&t<27.4){
+    const u=t-22;
+    $('b5zoom').style.transform=`scale(${lerp(1.03,1.0,easeOut(P(u,0,0.4)))}) scale(${lerp(1,1.05,u/5)})`;
+    slam($('b5doc'),t,22.1); $('b5doc').dataset.rot=-1.8;
+    slam($('b5tc'),t,22.55); $('b5tc').dataset.rot=1.9;
+    draw($('b5c1'),t,23.3,24.2);
+    draw($('b5c2'),t,23.5,24.4);
+    stampIn($('b5stamp'),t,24.8,-2);
+    $('b5stamp').style.transform+= ' translateX(-50%)';
+  }
+  // ---- B6
+  if(t>=26.8){
+    const u=t-27;
+    $('b6zoom').style.transform=`scale(${lerp(1.05,1.0,easeOut(P(u,0,0.6)))})`;
+    $('b6card').dataset.xform='rotate(-0.8deg)';
+    fadeUp($('b6card'),t,27.15,0.5,80);
+    const t1p=P(t,27.5,27.8); $('b6t1').style.opacity=t1p;
+    const t2p=P(t,28.9,29.2); $('b6t2').style.opacity=t2p;
+    draw($('b6u'),t,29.3,30.0);
+    const t3p=P(t,30.0,30.4); $('b6t3').style.opacity=t3p;
+    fadeUp($('b6sig'),t,30.2,0.5,40);
+  }
+}
+window.seek=seek;
+window.setUnderlines=setUnderlines;
+</script>
+</body>
+</html>

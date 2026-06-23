@@ -8,12 +8,15 @@ Runs inside Claude Code as a skill.
 
 ```
 sam-yt-shorts-engine/
-├── sam-clips-engine/           ← the Claude Code skill (SKILL.md, orchestrator, helpers, refs)
+├── sam-clips-engine/           ← clips skill: long-form interview → 30-45s talking-head Shorts
+├── edge-boil-reel/             ← reel skill: Vox-style annotated-document / newspaper reels
 ├── brand_library/              ← logos, person photos, motion graphic concepts, build scripts
 ├── music/                      ← 4 fallback music tracks
 ├── fonts/                      ← Montserrat (captions) + Bellefair (brand serif)
-└── install.sh                  ← one-shot install + sanity check
+└── install.sh                  ← one-shot install + sanity check (both skills)
 ```
+
+Two skills live here. **`sam-clips-engine`** cuts finished clips from existing footage. **`edge-boil-reel`** *builds* a designed annotated-document reel from a story + sourced assets (no presenter footage) — see its own section below. Both run inside Claude Code; `edge-boil-reel` runs entirely in the cloud off this repo.
 
 ## Quick start
 
@@ -34,9 +37,8 @@ cd sam-yt-shorts-engine
 ```
 
 The installer:
-- Symlinks `sam-clips-engine/` to `~/.claude/skills/sam-clips-engine/` so Claude Code discovers it
-- Verifies ffmpeg, yt-dlp, video-use, ElevenLabs key
-- Checks all asset paths resolve
+- Symlinks `sam-clips-engine/` and `edge-boil-reel/` into `~/.claude/skills/` so Claude Code discovers them
+- Runs each skill's own sanity check (clips: ffmpeg/yt-dlp/video-use/ElevenLabs + asset paths; edge-boil: installs Playwright + Chromium + the bundled ffmpeg)
 
 ### 2.5. Add YOUR ElevenLabs key (important — it's your bill)
 
@@ -129,6 +131,26 @@ Sam-specific:
 - **ElevenLabs Scribe transcription** — ~$0.40 per hour of source audio (cached). Each clip is also re-transcribed once for the end-of-word safety check (a few seconds of audio — negligible).
 - **Music** — Suno (if `SUNO_API_KEY` set) or ElevenLabs music gen, per-clip bespoke. Falls back to the bundled library tracks if no key / quota tight (free).
 - **Claude (for ranking)** — runs inside your Claude Code subscription, no additional API cost
+
+## Edge-Boil Reel (second skill)
+
+`edge-boil-reel/` builds **Vox-style annotated-document reels** — vintage newspaper/document cards on kraft paper with hand-drawn marker annotations that wobble ("edge boil") like frame-by-frame animation, real headline screenshots, an optional animated archival photo, and a music bed. It's a *designed* reel built from a story + sourced assets, not a cut from footage.
+
+**It runs entirely in the cloud off this repo** — no local machine on either end. The render is headless (Playwright → frames → ffmpeg), and the finished `.mp4` is handed back to you in the Claude Code session (no upload, no external account required).
+
+```
+edge-boil-reel/
+├── SKILL.md                  ← the skill (look, pipeline, rhythm rules)
+├── template/                 ← stage.html + render.py + fetch_fonts.py + crops/shots.py + gen_music.py + finish.sh
+├── references/               ← edge-boil + analog-photo technique, Moran toolkit + snippets, a worked beat sheet
+└── scripts/install.sh        ← installs Playwright + Chromium + bundled ffmpeg
+```
+
+Use it from Claude Code with something like:
+
+> *"Build an edge-boil reel about [story], with [these two headlines]."*
+
+Claude writes a beat sheet, sources the real assets, builds the stage, renders preview frames to iterate, then renders + encodes the finished reel and hands it back in chat. ElevenLabs (music) and Higgsfield (the one animated archival beat) are **optional** — without them it falls back to a bundled music track and a static Ken-Burns photo. See `edge-boil-reel/SKILL.md` for the full pipeline.
 
 ## Related repos
 

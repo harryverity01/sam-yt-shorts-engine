@@ -22,3 +22,10 @@ brand_library/concepts/CONTACT_SHEET*.png
 # Reference screenshots (private — Harry's own captures, not for distribution)
 brand_library/people/_*reference*
 brand_library/people/_*screenshot*
+
+# Edge-boil reel working dirs — generated frames, fonts, assets, finished binaries
+edge-boil-reel/work/
+edge-boil-reel/template/fonts/
+edge-boil-reel/template/preview/
+edge-boil-reel/template/frames_out/
+edge-boil-reel/template/finished/
