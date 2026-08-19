@@ -1,11 +1,82 @@
 ---
 name: sam-clips-engine
-description: End-to-end clips engine for Sam Eye Am (@sameyeam.secrets). Takes a long-form Sam interview/podcast (file or YouTube URL) and ships finished 30-45s vertical clips ready to upload — viral moment selection, precision cuts via Scribe word-level transcripts, Sam-brand b-roll from the brand library, Hormozi-style word-by-word captions, and Suno/ElevenLabs music (per-clip bespoke, library fallback). Use this skill whenever the user mentions Sam Eye Am, Sam Ey Am, @sameyeam, @sameyeam.secrets, clipping a Sam interview/podcast/long-form, or processing a Sam video to Shorts/Reels. Triggers on phrases like "clip this sam interview", "sam shorts from this video", "build sam clips", "process sam's podcast", "cut this for sam", "sam ey am pipeline", and any variant mentioning Sam + shorts/clips/reels/cuts. Even if the user just hands a video file or URL and mentions Sam, use this skill — it knows the full pipeline.
+description: End-to-end clips engine for Sam Eye Am (@sameyeam.secrets). Takes a long-form Sam interview/podcast (file or YouTube URL) and ships finished 30-45s vertical clips ready to upload — viral moment selection, precision cuts via Scribe word-level transcripts, REAL-screenshot edge-boil b-roll timed to the spoken word (plus recreated Instagram DM conversations for "AI in my DMs" clips), 2-word Bellefair captions on a black box (cut over the hook + b-roll), NO music (Sam's pref), and an optional Bellefair hook card for the Instagram cut. Cloud pipeline in cloud/ (see LOCKED DEFAULTS). Use this skill whenever the user mentions Sam Eye Am, Sam Ey Am, @sameyeam, @sameyeam.secrets, clipping a Sam interview/podcast/long-form, or processing a Sam video to Shorts/Reels. Triggers on phrases like "clip this sam interview", "sam shorts from this video", "build sam clips", "process sam's podcast", "cut this for sam", "sam ey am pipeline", and any variant mentioning Sam + shorts/clips/reels/cuts. Even if the user just hands a video file or URL and mentions Sam, use this skill — it knows the full pipeline.
 ---
 
 # Sam Clips Engine
 
 End-to-end clips engine for Sam Eye Am. Takes a long-form video → ships finished 1080×1920 .mp4 clips ready to upload.
+
+## ⛔ LOCKED DEFAULTS — Sam feedback, 2026-06-27 + 2026-07-06 + 2026-07-07 (these OVERRIDE the steps below)
+
+Sam reviewed a full batch (15 clips from the Danielle Lukins interview) and locked
+these. Apply them **every run** — they win over any contradicting instruction below.
+
+1. **NO MUSIC.** Sam finds a music bed "elevator music." Ship on Sam's voice only.
+   Step 6 (Suno/ElevenLabs/library music) is **retired** — do not add a bed.
+2. **Captions = 2 words on a BLACK BOX in Bellefair (LOCKED 2026-07-07).** Two words per
+   screen, white **Bellefair** serif on an **opaque black box**, centred low, timed to
+   Sam's speech (`cloud/cap_bellefair.py` — boxed 2-word is the default; `plain`/`per1`
+   only if ever needed). This **REPLACES** the old Archivo-Black yellow karaoke
+   (`cap_ass.py`, retired): Sam found white-on-nothing clashed with the set and one word
+   flashed too fast to read. **Cut the captions whenever they'd sit under the hook card or
+   over ANY b-roll** — `cloud/composite2.py` + `cloud/ig_hook.py` suppress them
+   automatically, so they only show over Sam's clean talking-head.
+3. **REAL screenshots, never typeset/recreation cards.** Every b-roll beat is a REAL
+   image: a real **news-article screenshot**, a real product/app page, the person's
+   **actual photo**, or a real stock photo. NO made-up cards (no typeset headlines, stat
+   cards, fake IG cards). To get a named person's face: **search Google → open a webpage
+   that shows their photo → screenshot THAT page** (not the search-results page).
+   - **Chromium can't navigate the cloud egress proxy** → real screenshots come from a
+     server-side service (**microlink**, `cloud/mlshot.py`); Playwright is used only
+     LOCALLY (`set_content`) to render cards, never to navigate.
+4. **B-roll TIMED to the spoken word.** The visual must match what Sam is saying at that
+   exact moment — verify every beat against the word-level transcript (show Gemini when
+   he says "Gemini", Whisper when he says "Whisper"). Re-time beats to the trigger word.
+5. **Yellow highlighter, not red circles.** Mark the key part of a screenshot with a
+   translucent **yellow** highlight band (read the content through it). Red
+   circles/underlines are obstructive — retired. **Photos get no annotation** (clean).
+   - **NO red stamps, EVER** (rule 8 — this was a recurring habit).
+6. **Bellefair hook ID card (Instagram version).** Each IG cut opens with a white
+   **Bellefair** title card at the BOTTOM. **LOCKED 2026-08-04: the card is fully on
+   screen from FRAME 0 — no slide-in, no fade-in. It transitions OUT only** (fade at
+   ~2.5s). Viewers must be able to read the hook in the first frame. It
+   must NOT cover Sam's face and must NOT clash with captions — **suppress the karaoke
+   for the hook window** (`cloud/ig_hook.py`). 2 lines, statement-style.
+7. **Process:** return the tight-hook clip IDEAS first for approval, then the as-cut
+   transcripts; then cut EXACTLY to the approved transcript — hook first, every
+   umm/err/false-start/repeat removed, silence-stripped, Sam-dominant.
+
+**Added 2026-07-06 (Danielle batch review round 2):**
+
+8. **NO red stamps — EVER.** The little red "NIGHTMARE / SCAM / C PLAYER" stamps Sam
+   called out a *habit* of adding. They are **hard-disabled at the engine level**
+   (`cloud/edgeboil.py` ignores any beat `stamp`). Do not re-enable them. The only marks
+   on a b-roll beat are the **yellow highlight** + the handwritten **Caveat** label.
+9. **Keep Sam CENTRED — re-dial the crop per clip.** A single fixed 2-shot crop drifts
+   because Sam sits differently across a 2hr shoot (leans forward/right in some sections).
+   Eyeball each clip against your best-framed clip; if he's off-centre or edging out of
+   frame, add a per-clip crop override in `cloud/render_base.py` (`CROP_OVERRIDE={id:...}`,
+   nudge the x-offset) so his face lands at the same spot every clip. Verify with a frame.
+10. **End on a COMPLETE word/button, never a trailing fragment.** Don't let a clip end on
+    a hanging "…to be—" even if the audio is technically whole; it reads as cut off.
+    Extend the end anchor to the next complete beat (e.g. Sam's confirming "Yeah.") so the
+    thought lands. Check the last kept word against the transcript before rendering.
+
+**Added 2026-07-07 (Danielle batch review round 3):**
+
+11. **"AI in my DMs" clips → RECREATE the DM conversation** (`cloud/dmphone.py`). A private
+    DM can't be screenshotted, so this is the ONE sanctioned exception to rule 3. It renders
+    a faithful dark-mode Instagram DM: Sam's **real face** as the avatar, real gradient
+    bubbles, optional timestamps for a "timing" beat — with our marks on top (yellow
+    highlight **outline** on the key bubble, since a highlighter band can't sit on a chat
+    bubble). **NO fake iOS status bar** (the `9:41`/battery strip — Sam had it removed) and
+    keep the handwritten labels OFF the DM beats (they read as clutter on a self-explanatory
+    convo). `broll_plan2.py` has a `dm()` helper; `build()` routes dm beats to `dmphone`.
+
+**The whole proven cloud pipeline is in `cloud/` — read `cloud/README.md` and reuse it.
+Don't rebuild it.** (The Steps below + `helpers/` are the older local/video-use flow;
+the LOCKED DEFAULTS + `cloud/` supersede them for caption style, music, and b-roll.)
 
 ## What this is and isn't
 
@@ -27,8 +98,8 @@ Sam will use this directly. Keep all paths Sam-relative — never reference Harr
 - **ffmpeg + ffprobe** on PATH
 - **yt-dlp** if ingesting from YouTube URL
 - Sam's assets present at:
-  - `/Volumes/Seagate/YouTube/Sam Ey Am/brand_library/` — manifest.json, concepts/, logos/, people/, build scripts
-  - `/Volumes/Seagate/Sam Ey AM Music/` — 4 fallback music tracks
+  - `<repo>/brand_library/` — manifest.json, concepts/, logos/, people/, build scripts
+  - `<repo>/music/` — 4 fallback music tracks
 
 Paths are read from `brand_assets.json` so Sam can override on his own machine.
 
@@ -129,7 +200,7 @@ This is a subtle warmth lift (red mids +6%, blue mids -10%) + slight contrast/sa
 
 Run `helpers/pick_broll.py <clip_transcript.json>` to scan the clip's words and propose b-roll overlays.
 
-**Trigger logic** (consult `/Volumes/Seagate/YouTube/Sam Ey Am/brand_library/manifest.json`):
+**Trigger logic** (consult `<repo>/brand_library/manifest.json`):
 
 | Trigger phrase in transcript | Overlay |
 |---|---|
@@ -189,7 +260,7 @@ corporate-ambient), and (b) **Suno** is the preferred generator. Provider order:
    - Generate via the configured Suno provider (sunoapi.org v1 shape by default),
      poll, download, trim to length. See `references/music_prompts.md` for setup.
 2. **ElevenLabs** — bespoke per-clip if Suno isn't configured or fails (`api.elevenlabs.io/v1/music`).
-3. Fallback: if both gen paths fail, pull from `/Volumes/Seagate/Sam Ey AM Music/`:
+3. Fallback: if both gen paths fail, pull from `<repo>/music/`:
    - `Show the How 2.mp3` — confident / proof / tutorial
    - `Show the How Suno.mp3` — same vibe, alternate
    - `Varation 1 strings.mp3` — emotive / origin / story
@@ -204,7 +275,7 @@ corporate-ambient), and (b) **Suno** is the preferred generator. Provider order:
 ```bash
 python3 -m sam_clips_engine.orchestrator \
   --input "/path/to/sam_podcast.mp4" \
-  --work-dir "/Volumes/Seagate/YouTube/Sam Ey Am/Shorts/<topic>" \
+  --work-dir "<your working folder>/<topic>" \
   --num-clips 12 \
   --target-length 35
 ```

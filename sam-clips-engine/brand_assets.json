@@ -4,10 +4,41 @@
   "brand_library": "../brand_library",
   "music_library": "../music",
   "music_tracks": [
-    {"file": "Show the How 2.mp3", "moods": ["confident", "proof", "tutorial", "how-to"]},
-    {"file": "Show the How Suno.mp3", "moods": ["confident", "proof", "tutorial", "alternate"]},
-    {"file": "Varation 1 strings.mp3", "moods": ["emotive", "origin", "story", "cinematic"]},
-    {"file": "Varation 2 strings.mp3", "moods": ["emotive", "restrained", "thoughtful"]}
+    {
+      "file": "Show the How 2.mp3",
+      "moods": [
+        "confident",
+        "proof",
+        "tutorial",
+        "how-to"
+      ]
+    },
+    {
+      "file": "Show the How Suno.mp3",
+      "moods": [
+        "confident",
+        "proof",
+        "tutorial",
+        "alternate"
+      ]
+    },
+    {
+      "file": "Varation 1 strings.mp3",
+      "moods": [
+        "emotive",
+        "origin",
+        "story",
+        "cinematic"
+      ]
+    },
+    {
+      "file": "Varation 2 strings.mp3",
+      "moods": [
+        "emotive",
+        "restrained",
+        "thoughtful"
+      ]
+    }
   ],
   "_fonts_comment": "Caption font used by burn_captions.py at 140pt. Montserrat is the OLD default Sam rejected — drop the new font files in ../fonts/ and point caption_black at the heaviest weight to swap.",
   "fonts": {
@@ -25,7 +56,7 @@
     "verify_with_scribe": true
   },
   "music": {
-    "_comment": "Provider order auto = Suno -> ElevenLabs -> library. Set SUNO_API_KEY and ELEVENLABS_API_KEY in env or the repo .env (see .env.example). No key -> falls through to the bundled library tracks.",
+    "_comment": "Provider order auto = Suno -> ElevenLabs -> library. Set SUNO_API_KEY and ELEVENLABS_API_KEY in env or the repo .env (see .env.example). No key -> falls through to the bundled library tracks. Music is RETIRED for Sam (music_enabled=false); this block only runs if you turn it back on.",
     "suno_base": "https://api.sunoapi.org",
     "suno_model": "V4",
     "suno_generate_path": "/api/v1/generate",
@@ -49,5 +80,7 @@
     "youtube_channel_id": "UCMkyqr9NHL1yiTOHR45n9mA",
     "course_url": "sameyeam.info/course",
     "discovery_call": "go.sameyeam.info/call"
-  }
+  },
+  "_LOCKED": "Sam feedback (see SKILL.md ⛔ LOCKED DEFAULTS + cloud/README.md): (1) NO MUSIC — ship on voice only, the music block below is RETIRED; (2) KARAOKE captions (Archivo Black, warm-yellow active word) NOT single-word pops; (3) b-roll = REAL screenshots/photos only (no typeset cards), yellow highlighter not red circles, timed to the spoken word; (4) IG cuts get a Bellefair hook card that slides up at the bottom ~2.2s with captions suppressed. Cloud caption font = Archivo Black; hook font = Bellefair; handwritten labels = Caveat (all fetched at runtime from Google Fonts).",
+  "music_enabled": false
 }

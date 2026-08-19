@@ -1,6 +1,6 @@
 # Brand Library Reference
 
-The brand library lives at `/Volumes/Seagate/YouTube/Sam Ey Am/brand_library/`. It is the single source of truth for every overlay asset.
+The brand library lives at `<repo>/brand_library/`. It is the single source of truth for every overlay asset.
 
 ## Current state (2026-05-28)
 
