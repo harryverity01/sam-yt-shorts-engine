@@ -1,5 +1,5 @@
 {
-  "_comment": "Sam YT Shorts Engine — asset paths. Paths starting with '../' are RELATIVE to this brand_assets.json file (i.e. one level up = repo root). Override only if you've moved assets outside the repo.",
+  "_comment": "Sam YT Shorts Engine \u2014 asset paths. Paths starting with '../' are RELATIVE to this brand_assets.json file (i.e. one level up = repo root). Override only if you've moved assets outside the repo.",
   "_repo_relative": true,
   "brand_library": "../brand_library",
   "music_library": "../music",
@@ -40,7 +40,7 @@
       ]
     }
   ],
-  "_fonts_comment": "Caption font used by burn_captions.py at 140pt. Montserrat is the OLD default Sam rejected — drop the new font files in ../fonts/ and point caption_black at the heaviest weight to swap.",
+  "_fonts_comment": "Caption font used by burn_captions.py at 140pt. Montserrat is the OLD default Sam rejected \u2014 drop the new font files in ../fonts/ and point caption_black at the heaviest weight to swap.",
   "fonts": {
     "caption_black": "../fonts/Montserrat-Black.ttf",
     "caption_bold": "../fonts/Montserrat-Bold.ttf",
@@ -56,7 +56,7 @@
     "verify_with_scribe": true
   },
   "music": {
-    "_comment": "Provider order auto = Suno -> ElevenLabs -> library. Set SUNO_API_KEY and ELEVENLABS_API_KEY in env or the repo .env (see .env.example). No key -> falls through to the bundled library tracks. Music is RETIRED for Sam (music_enabled=false); this block only runs if you turn it back on.",
+    "_comment": "Provider order auto = Suno -> ElevenLabs -> library. Set SUNO_API_KEY and ELEVENLABS_API_KEY in env or the repo .env (see .env.example). No key -> falls through to the bundled library tracks in <repo>/music, which composite3.py rotates through by clip id so no two clips in a batch share a bed.",
     "suno_base": "https://api.sunoapi.org",
     "suno_model": "V4",
     "suno_generate_path": "/api/v1/generate",
@@ -81,6 +81,6 @@
     "course_url": "sameyeam.info/course",
     "discovery_call": "go.sameyeam.info/call"
   },
-  "_LOCKED": "Sam feedback (see SKILL.md ⛔ LOCKED DEFAULTS + cloud/README.md): (1) NO MUSIC — ship on voice only, the music block below is RETIRED; (2) KARAOKE captions (Archivo Black, warm-yellow active word) NOT single-word pops; (3) b-roll = REAL screenshots/photos only (no typeset cards), yellow highlighter not red circles, timed to the spoken word; (4) IG cuts get a Bellefair hook card that slides up at the bottom ~2.2s with captions suppressed. Cloud caption font = Archivo Black; hook font = Bellefair; handwritten labels = Caveat (all fetched at runtime from Google Fonts).",
-  "music_enabled": false
+  "_LOCKED": "Sam feedback (SKILL.md LOCKED DEFAULTS + cloud/README.md): (1) MUSIC IS ON \u2014 one bed per clip, never one bed across a batch, mixed 16 dB under speech (18 dB for the quietest beds) with speech normalised to -16 LUFS. Reinstated 2026-08-29; the earlier no-music rule from 2026-06-27 is retired. (2) KARAOKE captions (Archivo Black, warm-yellow active word) NOT single-word pops; (3) b-roll = REAL screenshots/photos/footage only (no typeset cards), yellow highlighter not red circles, timed to the spoken word; (4) IG cuts get a Bellefair hook card. Cloud caption font = Archivo Black; hook font = Bellefair; handwritten labels = Caveat.",
+  "music_enabled": true
 }

@@ -51,7 +51,7 @@ config scripts, and run in order. **Reuse this — don't rebuild it.**
    `caps/NN/bellefair.ass`. (`cap_ass.py` = the retired Archivo-Black yellow karaoke.)
 8. **`composite2.py`** — base → b-roll overlays (under) → caption ASS (**last**), with
    captions **cut wherever they'd sit over b-roll or a DM** (they only show over Sam's
-   talking-head). **Sam voice only, NO music**. → `finals/NN_*.mp4`.
+   talking-head). Music is added in the next step by `composite3.py`. → `finals/NN_*.mp4`.
 9. **`ig_hook.py` / `ig_batch.py`** *(hook lines per-interview)* — Bellefair title card
    that slides up at the BOTTOM for ~2.2s (captions suppressed underneath + over b-roll;
    clear of the face); then captions + b-roll resume. → `finals_ig/NN_*_ig.mp4`.

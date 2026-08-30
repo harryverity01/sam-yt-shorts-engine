@@ -18,10 +18,23 @@ FF = imageio_ffmpeg.get_ffmpeg_exe()
 PLAN = {c["id"]: c for c in json.load(open(os.path.join(HERE, "plan.json")))}
 OUT = os.path.join(HERE, "finals")
 os.makedirs(OUT, exist_ok=True)
-MUS = os.path.join(HERE, "broll_src", "music")
+# Music lives in the batch workspace when one exists, otherwise in the repo's own
+# bundled library (<repo>/music). First folder that has audio in it wins.
+def _music_dir():
+    for c in (os.path.join(HERE, "broll_src", "music"),
+              os.path.abspath(os.path.join(HERE, "..", "..", "music"))):
+        if os.path.isdir(c) and any(f.lower().endswith((".mp3", ".wav", ".m4a"))
+                                    for f in os.listdir(c)):
+            return c
+    return os.path.join(HERE, "broll_src", "music")
 
-# One bed per clip, chosen for what the clip has to do. Measured character in the
-# comment: swing = how much the bed moves, bright = airy vs dark.
+
+MUS = _music_dir()
+
+# One bed per clip, NEVER one bed across a batch. An explicit entry here wins;
+# anything not listed falls back to the bundled library, rotating by clip id so
+# consecutive clips never share a bed. The map below is from the Karel + Melvin
+# batch and is kept as a worked example of matching a bed to what a clip does.
 BED = {
  1:  ("hv-bed_automation-flex_v1.mp3", 16),   # machine, restless      swing .88
  2:  ("hv-bed_news-urgency_v1.mp3",    16),   # clock pressure         swing .49
@@ -39,6 +52,16 @@ BED = {
 SPEECH_I = -16.0       # every clip lands on the same speech loudness
 SEP_DB = 16.0          # default speech-to-bed separation
 FADE = 1.2
+
+
+def pick_bed(cid):
+    """Rotate through the available library so each clip in a batch gets its own
+    bed. Deterministic, so a re-render of one clip keeps the same track."""
+    if not os.path.isdir(MUS):
+        return None
+    files = sorted(f for f in os.listdir(MUS)
+                   if f.lower().endswith((".mp3", ".wav", ".m4a")))
+    return files[(cid - 1) % len(files)] if files else None
 
 
 def load(p):
@@ -140,6 +163,10 @@ def composite(cid, hook_lines=None, to_finals=False):
     # ---- audio: speech + bed 16 dB under + sfx
     lufs = speech_lufs(base)          # measured, for the log only
     bed_name, sep = BED.get(cid, (None, SEP_DB))
+    if bed_name and not os.path.exists(os.path.join(MUS, bed_name)):
+        bed_name = None               # mapped bed is not on this machine
+    if bed_name is None:
+        bed_name = pick_bed(cid)      # rotate through whatever library is here
     bed = os.path.join(MUS, bed_name) if bed_name else None
     parts.append(f"[0:a]loudnorm=I={SPEECH_I}:TP=-1.5:LRA=11[sp]")
     amix = ["[sp]"]

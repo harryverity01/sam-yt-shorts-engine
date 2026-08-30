@@ -1,6 +1,6 @@
 ---
 name: sam-clips-engine
-description: End-to-end clips engine for Sam Eye Am (@sameyeam.secrets). Takes a long-form Sam interview/podcast (file or YouTube URL) and ships finished 30-45s vertical clips ready to upload — viral moment selection, precision cuts via Scribe word-level transcripts, REAL-screenshot edge-boil b-roll timed to the spoken word (plus recreated Instagram DM conversations for "AI in my DMs" clips), 2-word Bellefair captions on a black box (cut over the hook + b-roll), NO music (Sam's pref), and an optional Bellefair hook card for the Instagram cut. Cloud pipeline in cloud/ (see LOCKED DEFAULTS). Use this skill whenever the user mentions Sam Eye Am, Sam Ey Am, @sameyeam, @sameyeam.secrets, clipping a Sam interview/podcast/long-form, or processing a Sam video to Shorts/Reels. Triggers on phrases like "clip this sam interview", "sam shorts from this video", "build sam clips", "process sam's podcast", "cut this for sam", "sam ey am pipeline", and any variant mentioning Sam + shorts/clips/reels/cuts. Even if the user just hands a video file or URL and mentions Sam, use this skill — it knows the full pipeline.
+description: End-to-end clips engine for Sam Eye Am (@sameyeam.secrets). Takes a long-form Sam interview/podcast (file or YouTube URL) and ships finished 30-45s vertical clips ready to upload — viral moment selection, precision cuts via Scribe word-level transcripts, REAL-screenshot edge-boil b-roll timed to the spoken word (plus recreated Instagram DM conversations for "AI in my DMs" clips), 2-word Bellefair captions on a black box (cut over the hook + b-roll), a music bed chosen per clip, and a Bellefair hook card for the Instagram cut. Cloud pipeline in cloud/ (see LOCKED DEFAULTS). Use this skill whenever the user mentions Sam Eye Am, Sam Ey Am, @sameyeam, @sameyeam.secrets, clipping a Sam interview/podcast/long-form, or processing a Sam video to Shorts/Reels. Triggers on phrases like "clip this sam interview", "sam shorts from this video", "build sam clips", "process sam's podcast", "cut this for sam", "sam ey am pipeline", and any variant mentioning Sam + shorts/clips/reels/cuts. Even if the user just hands a video file or URL and mentions Sam, use this skill — it knows the full pipeline.
 ---
 
 # Sam Clips Engine
@@ -12,8 +12,11 @@ End-to-end clips engine for Sam Eye Am. Takes a long-form video → ships finish
 Sam reviewed a full batch (15 clips from the Danielle Lukins interview) and locked
 these. Apply them **every run** — they win over any contradicting instruction below.
 
-1. **NO MUSIC.** Sam finds a music bed "elevator music." Ship on Sam's voice only.
-   Step 6 (Suno/ElevenLabs/library music) is **retired** — do not add a bed.
+1. **MUSIC IS ON (reinstated 2026-08-29).** Every clip gets a bed. The old
+   "no music" rule from 2026-06-27 is retired: the complaint then was that one
+   flat bed ran across a whole batch and read as elevator music, not that music
+   itself was wrong. The fix is per-clip selection, not silence. See rule 16 for
+   how to pick and mix it.
 2. **Captions = 2 words on a BLACK BOX in Bellefair (LOCKED 2026-07-07).** Two words per
    screen, white **Bellefair** serif on an **opaque black box**, centred low, timed to
    Sam's speech (`cloud/cap_bellefair.py` — boxed 2-word is the default; `plain`/`per1`
@@ -107,10 +110,15 @@ These rules made the difference. Apply them on every run:**
 15. **No annotations on a real source.** No marker sweeps, no source labels, no
     bands. The card itself is the design. A highlight inside a page you recreated
     is fine, because that is part of the page.
-16. **If music is used, one bed per clip,** chosen for what that clip has to do,
-    16 dB under speech (18 dB for the quietest beds), speech normalised to
-    -16 LUFS. Never one bed across a whole batch. Sam's default is still NO MUSIC
-    (rule 1) — confirm per batch, never assume.
+16. **One bed per clip, never one bed across a batch.** Pick the bed for what
+    that clip has to do: money story gets something blunt, an underdog story
+    gets a warm resolve, a joke beat gets the quietest bed so the joke carries.
+    Mix it 16 dB under speech, 18 dB for the quietest beds, with speech
+    normalised to -16 LUFS. `composite3.py` takes an explicit clip-to-bed map
+    when you have made one, and otherwise rotates through the bundled library in
+    `<repo>/music` by clip id, so consecutive clips never share a track. If a
+    mapped bed is not on the machine it falls back to the library rather than
+    failing the render.
 17. **Look at a frame from EVERY beat before compositing,** as a contact sheet,
     then a 6-frame strip from every finished clip. This is what catches the wrong
     footage, a mislabelled file and a crop that drifted.
