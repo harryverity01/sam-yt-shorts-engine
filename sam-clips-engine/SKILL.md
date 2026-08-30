@@ -74,6 +74,60 @@ these. Apply them **every run** — they win over any contradicting instruction 
     keep the handwritten labels OFF the DM beats (they read as clutter on a self-explanatory
     convo). `broll_plan2.py` has a `dm()` helper; `build()` routes dm beats to `dmphone`.
 
+**Added 2026-08-28 (Karel + Melvin batch — the one Sam and Harry both signed off).
+These rules made the difference. Apply them on every run:**
+
+12. **ZERO generic stock. Ever.** A whole batch was rejected over one Pexels clip
+    that was tagged "street festival crowd" and was actually a religious procession
+    in Manila, used for a Netherlands King's Day line. Stock tags lie. Source every
+    video beat down this ladder and stop at the first rung that works:
+    1. **Sam's own R2 b-roll library** (2,000+ clips: phone, desks, poolside, villa
+       networking, his real Lightroom screen recordings with face cam). Pull a frame
+       from the DOWNLOADED file and look at it before the beat enters the plan. One
+       key held completely different footage from what its name said.
+    2. **The subject's own channel and website.** A guest's company gets THEIR
+       vertical shorts (yt-dlp) and THEIR real pages. For site captures, use a tall
+       viewport (h=3400) rather than fullPage, crop to the meaningful region, mount
+       on the vox card and PAN inside it (`voxcard.py` shot beats take `croph`).
+       Never start a capture on a decorative hero image: one company's homepage hero
+       is a plant video, so the top of the page reads as random foliage.
+    3. **A named real video of the named real thing.** Search the event by its own
+       name (Koningsdag, not "crowd party") and pull that section.
+    4. **A hand-drawn vox graphic** for abstract lines: `voxcard.py` kind `gfx` gives
+       you `chart` (rising or falling), `cross` (supply and demand), `clock`,
+       `funnel`, `stack`. Boiling ink and teal on cream paper, Caveat labels.
+    If a page blocks the screenshot service, recreate it from its real fetched HTML
+    with its real logo SVG pulled from the site's own markup (`hbr_page.py` is the
+    worked example). Verbatim text only. Never invent a headline or a statistic.
+13. **Landscape footage mounts on the vox paper** with a white border and soft
+    shadow, sides trimmed to about 3:2. Never centre-crop landscape into 9:16; it
+    cuts the subject in half. Portrait sources still fill the frame.
+14. **The Bellefair hook card opens EVERY cut,** not only the Instagram one. The
+    type auto-shrinks so a long line never clips.
+15. **No annotations on a real source.** No marker sweeps, no source labels, no
+    bands. The card itself is the design. A highlight inside a page you recreated
+    is fine, because that is part of the page.
+16. **If music is used, one bed per clip,** chosen for what that clip has to do,
+    16 dB under speech (18 dB for the quietest beds), speech normalised to
+    -16 LUFS. Never one bed across a whole batch. Sam's default is still NO MUSIC
+    (rule 1) — confirm per batch, never assume.
+17. **Look at a frame from EVERY beat before compositing,** as a contact sheet,
+    then a 6-frame strip from every finished clip. This is what catches the wrong
+    footage, a mislabelled file and a crop that drifted.
+18. **Cut both speakers, guest-dominant, for interview clips** (`build_cut.py` and
+    `render_base2.py`). Keep the guest on their own lines and drive the crop from
+    whoever is speaking in each range.
+
+## Which model runs this skill
+
+- **A new batch from a fresh long-form: use Claude Fable.** Picking the moments,
+  planning the beats, sourcing the assets and judging each beat is judgment work.
+  That is where the quality comes from.
+- **Revisions of an existing batch: Claude Opus is fine.** Re-cuts against an
+  approved plan, swapping one beat, recompositing, re-uploading, metadata changes.
+  The decisions are already made and Opus executes them at lower cost.
+- The test: does this run CHOOSE anything, or only EXECUTE choices already made?
+
 **The whole proven cloud pipeline is in `cloud/` — read `cloud/README.md` and reuse it.
 Don't rebuild it.** (The Steps below + `helpers/` are the older local/video-use flow;
 the LOCKED DEFAULTS + `cloud/` supersede them for caption style, music, and b-roll.)

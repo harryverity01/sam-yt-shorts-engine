@@ -102,3 +102,17 @@ config scripts, and run in order. **Reuse this — don't rebuild it.**
 - ElevenLabs Scribe in ONE call keeps diarisation labels consistent; chunking resets them.
 - The SVG `feDisplacementMap` "boil" rainbow-smears large thin strokes in the bundled
   Chromium — use the per-frame `#annog` jitter instead (already wired in `edgeboil.py`).
+
+## v2 additions (2026-08-28, Karel + Melvin batch)
+
+- `voxcard.py` — vox decoder cards AND hand-drawn gfx beats (kinds: article, shot
+  with `croph` site pans, photo, blank, gfx: chart/cross/clock/funnel/stack).
+  Same 1080x1920 mp4 output contract as edgeboil.py.
+- `build_cut.py` + `render_base2.py` — guest-dominant two-speaker EDL and per-side crop.
+- `bars.py` — prison-bar drop/lift transition with real SFX events.
+- `hbr_page.py` — recreate a blocked site's article page from its real HTML + real
+  logo SVG; the pattern for any page microlink cannot capture.
+- `composite3.py` — video stack + per-clip music bed (16dB under, -16 LUFS speech)
+  + SFX, hook card on every cut, 420s per-clip timeout.
+
+Full sourcing rules: SKILL.md items 12-18. Zero generic stock, ever.
